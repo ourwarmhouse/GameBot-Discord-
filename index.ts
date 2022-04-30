@@ -1,22 +1,22 @@
-
-import { Client, Intents } from 'discord.js';
-import dotenv from 'dotenv';
-import Message from './src/Handler/message';
-import Ready from './src/Handler/ready';
-import { Play } from './src/Commands/Music'
+import { Client, Intents } from "discord.js";
+import dotenv from "dotenv";
+import Message from "./src/Handler/message";
+import Ready from "./src/Handler/ready";
+import { Play } from "./src/Commands/Music";
 
 const main = async () => {
-    dotenv.config()
-    const client = new Client({ intents: [Intents.FLAGS.GUILDS,Intents.FLAGS.GUILD_MESSAGES] })
-    client.login(process.env.DISCORD_TOKEN)
-    const readyHandler = new Ready(client)
-    const messageHanlder = new Message(client)
+  dotenv.config();
+  const client = new Client({
+    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES,Intents.FLAGS.GUILD_VOICE_STATES]
+  });
+  client.login(process.env.DISCORD_TOKEN);
+  const readyHandler = new Ready(client);
+  const messageHanlder = new Message(client);
 
-    readyHandler.handle()
+  readyHandler.handle();
 
-    messageHanlder.addCommand(new Play())
-    messageHanlder.handle()
+  messageHanlder.addCommand(new Play());
+  messageHanlder.handle();
+};
 
-}
-
-main()
+main();
