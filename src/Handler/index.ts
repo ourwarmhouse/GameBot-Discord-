@@ -1,14 +1,14 @@
-import { Client } from "discord.js";
+import {Client} from 'discord.js'
 
 export default abstract class Handler {
-  private _client: Client;
-  constructor(client: Client) {
-    this._client = client;
-  }
+    private _client: Client
+    constructor(client: Client) {
+        this._client = client
+    }
 
-  abstract handle(): void;
+    abstract handle(): void
 
-  public get client() {
-    return this._client;
-  }
+    public get client() {
+        return this._client
+    }
 }
