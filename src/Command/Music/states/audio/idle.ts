@@ -6,7 +6,10 @@ import Playing from './playing'
 export default class Idle extends State {
     public play(): void {
         const queue = this._music.queue.current
-        if (!(queue.length > 0)) return
+        if (!(queue.length > 0)) {
+            this._music.connection.disconnect()
+            return
+        }  
         const stream = ytdl(`https://youtube.com?v=${queue[0].song.id}`, {
             filter: 'audioonly',
         })

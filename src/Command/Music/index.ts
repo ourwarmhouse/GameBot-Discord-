@@ -39,11 +39,16 @@ export default class Music {
         this.player.on(AudioPlayerStatus.Idle, (oldState,newState) => {
             if (oldState.status == 'playing' && newState.status == 'idle') {
                 const oldSong = this.queue.current.shift()
-                if (this.queue.isRepeating && oldSong)
-                    this.queue.current.push(oldSong)
+                if (oldSong) {
+                    if (this.queue.isRepeating)
+                        this.queue.current.push(oldSong)
+                    this.changeAudioState(new AudioIdle())
+                    this._audioState.play()
+                }
+                else
+                    this.connection.disconnect()
                 
-                this.changeAudioState(new AudioIdle())
-                this._audioState.play()
+                
             }
             
         })
