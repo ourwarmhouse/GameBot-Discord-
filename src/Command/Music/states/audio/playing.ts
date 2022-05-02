@@ -5,7 +5,5 @@ export default class Playing extends State {
     constructor() {
         super()
     }
-    play(): void {
-        
-    }
+    play(): void {}
 }

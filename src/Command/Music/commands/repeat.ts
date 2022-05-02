@@ -1,7 +1,7 @@
-import { bold } from '@discordjs/builders'
-import { Message } from 'discord.js'
+import {bold} from '@discordjs/builders'
+import {Message} from 'discord.js'
 import MessageHandler from 'Handler/message'
-import { MusicCommand } from '.'
+import {MusicCommand} from '.'
 import Music from '..'
 
 export default class Repeat extends MusicCommand {
@@ -13,15 +13,14 @@ export default class Repeat extends MusicCommand {
 
     async execute(messageHandler: MessageHandler, message: Message) {
         try {
-            
             const args = messageHandler.commandArgs[0]
-            if (args == 'queue' || args == 'q')
-            this._music.queue.repeat()
-            
-            message.channel.send(bold('Current queue is repeating'))
-        }
-        catch (e) {
-            console.error('Can\'t repeat')
+            if (args == 'queue' || args == 'q') {
+                this._music.queue.repeat()
+                message.channel.send(bold('Current queue is repeating'))
+            }
+
+        } catch (e) {
+            console.error("Can't repeat")
         }
     }
 

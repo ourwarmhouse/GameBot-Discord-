@@ -1,10 +1,10 @@
-import {bold, inlineCode} from '@discordjs/builders'
+import {bold, inlineCode, time} from '@discordjs/builders'
 import {Message} from 'discord.js'
+import formatDuration from 'format-duration'
 import MessageHandler from 'Handler/message'
 import {MusicCommand} from '.'
 import Music from '..'
 import {TrackInQueueType} from '../queue'
-import formatDuration from 'format-duration'
 
 export default class Queue extends MusicCommand {
     constructor(_music: Music) {
@@ -28,22 +28,26 @@ export default class Queue extends MusicCommand {
     }
 
     async execute(messageHandler: MessageHandler, message: Message) {
-        const playlist = this._music.queue.current
-        const content =
-            bold('Current queue:') +
-            '\n\n' +
-            this.getPlaylistString(playlist) +
-            '\n\n' +
-            'There are ' +
-            bold(playlist.length.toString()) +
-            ' with total ' +
-            bold(
-                `[${formatDuration(
-                    playlist.reduce((acc, ele) => acc + ele.song.duration, 0)
-                )}]`
-            ) +
-            ' in queue'
-        message.channel.send(content)
+        try {
+            const playlist = this._music.queue.current
+            const content =
+                bold('Current queue:') +
+                '\n\n' +
+                this.getPlaylistString(playlist) +
+                '\n\n' +
+                'There are ' +
+                bold(playlist.length.toString()) +
+                ' with total ' +
+                bold(
+                    `[${formatDuration(
+                        playlist.reduce((acc, ele) => acc + ele.song.duration, 0)
+                    )}]`
+                ) +
+                ' in queue'
+            message.channel.send(content)
+        }catch(e){
+            console.log('Can\'t get the queue')
+        }
     }
 
     public help(): void {}

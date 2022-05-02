@@ -15,7 +15,10 @@ export default class MusicQueue {
     public get current() {
         return this._queue
     }
-    public get isRepeating() { return this._isRepeating }
-    public repeat() { this._isRepeating = true }
-    
+    public get isRepeating() {
+        return this._isRepeating
+    }
+    public repeat() {
+        this._isRepeating = true
+    }
 }

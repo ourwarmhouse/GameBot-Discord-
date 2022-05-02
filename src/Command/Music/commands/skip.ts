@@ -1,8 +1,7 @@
-import { Message } from 'discord.js'
+import {Message} from 'discord.js'
 import MessageHandler from 'Handler/message'
-import { MusicCommand } from '.'
+import {MusicCommand} from '.'
 import Music from '..'
-import AudioIdle from '../states/audio/idle'
 
 export default class Skip extends MusicCommand {
     constructor(_music: Music) {
@@ -13,18 +12,9 @@ export default class Skip extends MusicCommand {
 
     async execute(messageHandler: MessageHandler, message: Message) {
         try {
-            
-            // const queue = this._music.queue
-            // const oldSong = queue.current.shift()
-            // if (queue.isRepeating && oldSong)
-            // queue.current.push(oldSong)
-            
-            // this._music.changeAudioState(new AudioIdle())
             this._music.player.stop(true)
-            //this._music.clickPlay(message)
-        }
-        catch (e) {
-            console.error('Can\'t skip the song')
+        } catch (e) {
+            console.error("Can't skip the song")
         }
     }
 

@@ -1,9 +1,7 @@
 import {bold, inlineCode} from '@discordjs/builders'
-import {createAudioResource} from '@discordjs/voice'
 import {Message} from 'discord.js'
 import MessageHandler from 'Handler/message'
 import {Video, YouTube} from 'youtube-sr'
-import ytdl from 'ytdl-core'
 import {MusicCommand} from '.'
 import Music from '..'
 
@@ -51,22 +49,22 @@ export default class Play extends MusicCommand {
             })
             collector.on('collect', async (msg) => {
                 //validate the number which user chosed
-                const chosedNumber = Number(msg.content)
+                const chooseNumber = Number(msg.content)
                 if (
-                    isNaN(chosedNumber) ||
-                    chosedNumber < 1 ||
-                    chosedNumber > this._limitSearch
+                    isNaN(chooseNumber) ||
+                    chooseNumber < 1 ||
+                    chooseNumber > this._limitSearch
                 ) {
                     message.channel.send('Not an option or a number!')
                     return
                 }
-                const result = results[chosedNumber - 1]
+                const result = results[chooseNumber - 1]
 
                 //edit content when song was chosen
 
                 const chosedContent =
                     `Track ` +
-                    bold(`${chosedNumber.toString()}#`) +
+                    inlineCode(`[${chooseNumber}]`) +
                     ` has been chosen by ` +
                     bold(msg.member?.nickname || 'anonymous') +
                     '\n' +
@@ -74,14 +72,12 @@ export default class Play extends MusicCommand {
                     ' ' +
                     inlineCode(`[${result.durationFormatted}]`)
                 if (msg.editable) {
-                    console.log('Editable')
                     await msg.edit(chosedContent)
                 } else if (msg.deletable) {
-                    console.log('Deletable')
                     await msg.delete()
                     message.channel.send(chosedContent)
                 } else {
-                    console.log("Can't edit message")
+                    throw new Error("Can't reply user's choosing")
                 }
 
                 //get stream and play song

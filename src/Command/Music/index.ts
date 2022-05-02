@@ -1,62 +1,91 @@
 import {
     AudioPlayerStatus,
+    AudioResource,
     createAudioPlayer,
     VoiceConnection,
     VoiceConnectionStatus,
 } from '@discordjs/voice'
-import {Message} from 'discord.js'
+import { Message, VoiceBasedChannel, TextBasedChannel } from 'discord.js'
 import Command from '..'
 import PlayCommand from './commands/play'
 import QueueCommand from './commands/queue'
 import RepeatCommand from './commands/repeat'
 import SkipCommand from './commands/skip'
+import NowPlayingCommand from './commands/nowplaying'
+import LeaveCommand from './commands/leave'
 import MusicQueue from './queue'
 import AudioState from './states/audio'
 import AudioIdle from './states/audio/idle'
-import AudioPlaying from './states/audio/playing'
 import ConnectionState from './states/connection'
+import Connecting from './states/connection/connecting'
 import Disconnect from './states/connection/disconnect'
+import Ready from './states/connection/ready'
 
 export default class Music {
-    protected _audioState!: AudioState 
-    protected _connectionState!: ConnectionState
     private _commands: Command[] = []
+
+    protected _audioState!: AudioState
     public player = createAudioPlayer()
+    public queue: MusicQueue
+    private _currentResource!: AudioResource
+    protected _connectionState!: ConnectionState
     public connection!: VoiceConnection
 
-    public queue: MusicQueue
+    private _currentVoiceChannel!: VoiceBasedChannel
+    private _textChannelList: TextBasedChannel[] = []
 
     constructor() {
         this._commands = this._commands.concat([
             new PlayCommand(this),
             new QueueCommand(this),
             new RepeatCommand(this),
-            new SkipCommand(this)
+            new SkipCommand(this),
+            new NowPlayingCommand(this),
+            new LeaveCommand(this)
         ])
         this.changeConnectionState(new Disconnect())
         this.changeAudioState(new AudioIdle())
         this.queue = new MusicQueue()
-        this.player.on(AudioPlayerStatus.Idle, (oldState,newState) => {
+        this.player.on(AudioPlayerStatus.Idle, (oldState, newState) => {
             if (oldState.status == 'playing' && newState.status == 'idle') {
                 const oldSong = this.queue.current.shift()
                 if (oldSong) {
-                    if (this.queue.isRepeating)
-                        this.queue.current.push(oldSong)
+                    if (this.queue.isRepeating) this.queue.current.push(oldSong)
                     this.changeAudioState(new AudioIdle())
                     this._audioState.play()
+                } else {
+                    this.changeConnectionState(new Disconnect())
+                    this._connectionState.disconnect()
                 }
-                else
-                    this.connection.disconnect()
-                
-                
             }
-            
-        })
-        this.player.on(AudioPlayerStatus.Playing, () => {
-            this.changeAudioState(new AudioPlaying())
         })
     }
 
+    public clickPlay(message: Message) {
+        //get connect if haven't yet
+        this.changeConnectionState(new Connecting())
+        if (this._connectionState.connect(message)) {
+            this.changeConnectionState(new Ready())
+        }
+
+        //play audio if connect is established
+        console.log(this._connectionState.isConnect)
+        if (this._connectionState.isConnect) {
+            if (this._connectionState.subscribeAudio()) this._audioState.play()
+        }
+    }
+
+    public clickSkip() { }
+
+    public clickQueue() { }
+
+    public clickPause() { }
+
+    public clickResume() { }
+
+    public get commands() {
+        return this._commands
+    }
     public changeAudioState(state: AudioState) {
         this._audioState = state
         this._audioState.setMusic(this)
@@ -65,28 +94,22 @@ export default class Music {
         this._connectionState = state
         this._connectionState.setMusic(this)
     }
-
-    public clickPlay(message: Message) {
-        if (
-            !this.connection ||
-            this.connection.state.status == 'disconnected' ||
-            this.connection.state.status == 'destroyed'
-        )
-            if (this._connectionState.connect(message))
-                this._audioState.play()
-        else
-            this._audioState.play()    
+    public get currentVoiceChannel() {
+        return this._currentVoiceChannel
     }
-
-    public clickSkip() {}
-
-    public clickQueue() {}
-
-    public clickPause() {}
-
-    public clickResume() {}
-
-    public get commands() {
-        return this._commands
+    public setCurrentVoiceChannel(newChannel: VoiceBasedChannel) {
+        this._currentVoiceChannel = newChannel
+    }
+    public get textChannelList() {
+        return this._textChannelList
+    }
+    public get connectionState() {
+        return this._connectionState
+    }
+    public get currentResource() {
+        return this._currentResource
+    }
+    public setCurrentResource(newResource: AudioResource) {
+        this._currentResource = newResource
     }
 }
