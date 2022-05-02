@@ -1,8 +1,10 @@
 import Command from 'Command'
 import Music from '../Command/Music'
+import User from '../Command/User'
 import {Client, Collection} from 'discord.js'
 import Handler from '.'
 import Constant from '../Constant'
+import Help from '../Command/help'
 
 export default class Message extends Handler {
     private _commands = new Collection<string, Command>()
@@ -12,9 +14,14 @@ export default class Message extends Handler {
     constructor(client: Client) {
         super(client)
         const music = new Music()
-        for (let command of music.commands) {
-            this.addCommand(command)
-        }
+        music.commands.forEach(c => this.addCommand(c))
+        const user = new User()
+        user.commands.forEach(c => this.addCommand(c))
+
+        const helpCommand = new Help()
+            .addField({ title: 'Music', content: music.helpCommand.getHelpString() })
+        
+        this.addCommand(helpCommand)
     }
     public handle() {
         this.client.on('messageCreate', (message) => {
@@ -22,19 +29,38 @@ export default class Message extends Handler {
             const commands = message.content
                 .slice(Constant.prefix.length)
                 .split(' ')
-            let command = commands.shift() + ' ' + commands.shift()
+            
+            //command one character
+            let command = commands.shift()
             const args = commands
 
             if (!command) return
 
             const aliasToCommand = this._aliases.get(command)
+            
             let commandFromCollection = aliasToCommand
                 ? this._commands.get(aliasToCommand)
                 : this._commands.get(command)
+            this.commandArgs = args
+            
+
+            if (!commandFromCollection) {
+                //command two character
+                command += ' ' + commands.shift()
+                const args = commands
+
+                if (!command) return
+
+                const aliasToCommand = this._aliases.get(command)
+                
+                commandFromCollection = aliasToCommand
+                    ? this._commands.get(aliasToCommand)
+                    : this._commands.get(command)
+                this.commandArgs = args
+                
+            }
 
             if (!commandFromCollection) return
-
-            this.commandArgs = args
 
             try {
                 commandFromCollection.execute(this, message)

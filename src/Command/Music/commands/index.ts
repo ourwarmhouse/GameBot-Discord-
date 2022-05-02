@@ -7,4 +7,5 @@ export abstract class MusicCommand extends Command {
         this._name = 'music'
         this._alias = 'm'
     }
+    public get music(){return this._music}
 }

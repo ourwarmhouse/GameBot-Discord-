@@ -1,10 +1,10 @@
-import {bold, time, hyperlink, inlineCode} from '@discordjs/builders'
-import {Message, MessageEmbed} from 'discord.js'
+import { hyperlink, inlineCode } from '@discordjs/builders'
+import thounsandFormat from 'aveta'
+import { Message, MessageEmbed } from 'discord.js'
 import formatDuration from 'format-duration'
 import MessageHandler from 'Handler/message'
-import {MusicCommand} from '.'
+import { MusicCommand } from '.'
 import Music from '..'
-import thounsandFormat from 'aveta'
 
 export default class NowPlaying extends MusicCommand {
     constructor(_music: Music) {
@@ -54,9 +54,8 @@ export default class NowPlaying extends MusicCommand {
             
             message.reply({embeds: [content]})
         } catch (e) {
+            message.channel.send('Please try again !')
             console.error("Can't get playing song")
         }
     }
-
-    public help(): void {}
 }

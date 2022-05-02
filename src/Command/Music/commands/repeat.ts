@@ -20,9 +20,9 @@ export default class Repeat extends MusicCommand {
             }
 
         } catch (e) {
+            message.channel.send('Please try again !')
             console.error("Can't repeat")
         }
     }
 
-    public help(): void {}
 }

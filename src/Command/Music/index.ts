@@ -2,17 +2,17 @@ import {
     AudioPlayerStatus,
     AudioResource,
     createAudioPlayer,
-    VoiceConnection,
-    VoiceConnectionStatus,
+    VoiceConnection
 } from '@discordjs/voice'
-import { Message, VoiceBasedChannel, TextBasedChannel } from 'discord.js'
-import Command from '..'
+import { Message, TextBasedChannel, VoiceBasedChannel } from 'discord.js'
+import { ComamndManager } from '..'
+import HelpCommand from './commands/help'
+import LeaveCommand from './commands/leave'
+import NowPlayingCommand from './commands/nowplaying'
 import PlayCommand from './commands/play'
 import QueueCommand from './commands/queue'
 import RepeatCommand from './commands/repeat'
 import SkipCommand from './commands/skip'
-import NowPlayingCommand from './commands/nowplaying'
-import LeaveCommand from './commands/leave'
 import MusicQueue from './queue'
 import AudioState from './states/audio'
 import AudioIdle from './states/audio/idle'
@@ -21,9 +21,7 @@ import Connecting from './states/connection/connecting'
 import Disconnect from './states/connection/disconnect'
 import Ready from './states/connection/ready'
 
-export default class Music {
-    private _commands: Command[] = []
-
+export default class Music extends ComamndManager {
     protected _audioState!: AudioState
     public player = createAudioPlayer()
     public queue: MusicQueue
@@ -35,13 +33,16 @@ export default class Music {
     private _textChannelList: TextBasedChannel[] = []
 
     constructor() {
+        super()
+        this._helpCommand = new HelpCommand(this)
         this._commands = this._commands.concat([
             new PlayCommand(this),
             new QueueCommand(this),
             new RepeatCommand(this),
             new SkipCommand(this),
             new NowPlayingCommand(this),
-            new LeaveCommand(this)
+            new LeaveCommand(this),
+            this._helpCommand
         ])
         this.changeConnectionState(new Disconnect())
         this.changeAudioState(new AudioIdle())
@@ -69,13 +70,19 @@ export default class Music {
         }
 
         //play audio if connect is established
-        console.log(this._connectionState.isConnect)
         if (this._connectionState.isConnect) {
             if (this._connectionState.subscribeAudio()) this._audioState.play()
         }
     }
 
-    public clickSkip() { }
+    public clickSkip() { 
+        this.player.stop()
+    }
+
+    public clickLeave() {
+        this.changeConnectionState(new Disconnect())
+        this.connectionState.disconnect()
+    }
 
     public clickQueue() { }
 
@@ -83,9 +90,6 @@ export default class Music {
 
     public clickResume() { }
 
-    public get commands() {
-        return this._commands
-    }
     public changeAudioState(state: AudioState) {
         this._audioState = state
         this._audioState.setMusic(this)

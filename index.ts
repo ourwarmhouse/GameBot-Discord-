@@ -1,10 +1,13 @@
+import Database from './src/Database'
 import {Client, Intents} from 'discord.js'
 import dotenv from 'dotenv'
 import Message from './src/Handler/message'
 import Ready from './src/Handler/ready'
+import AddToServer from './src/Handler/addToServer'
 
 const main = async () => {
     dotenv.config()
+    await Database.connect()
     const client = new Client({
         intents: [
             Intents.FLAGS.GUILDS,
@@ -14,10 +17,12 @@ const main = async () => {
     })
     client.login(process.env.DISCORD_TOKEN)
     const readyHandler = new Ready(client)
-    const messageHanlder = new Message(client)
-    readyHandler.handle()
+    const messageHandler = new Message(client)
+    const addToServerHandler = new AddToServer(client)
 
-    messageHanlder.handle()
+    readyHandler.handle()
+    addToServerHandler.handle()
+    messageHandler.handle()
 }
 
 main()

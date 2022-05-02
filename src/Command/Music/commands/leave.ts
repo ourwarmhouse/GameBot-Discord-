@@ -1,9 +1,7 @@
-import {bold} from '@discordjs/builders'
-import {Message} from 'discord.js'
+import { Message } from 'discord.js'
 import MessageHandler from 'Handler/message'
-import {MusicCommand} from '.'
+import { MusicCommand } from '.'
 import Music from '..'
-import Disconnect from '../states/connection/disconnect'
 
 export default class Leave extends MusicCommand {
     constructor(_music: Music) {
@@ -14,12 +12,11 @@ export default class Leave extends MusicCommand {
 
     async execute(messageHandler: MessageHandler, message: Message) {
         try {
-            this._music.changeConnectionState(new Disconnect())
-            this._music.connectionState.disconnect()
+            this._music.clickLeave()
         } catch (e) {
+            message.channel.send('Please try again !')
             console.log("Can't leave")
         }
     }
 
-    public help(): void {}
 }

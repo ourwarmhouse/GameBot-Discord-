@@ -1,6 +1,6 @@
-import {Message} from 'discord.js'
+import { Message } from 'discord.js'
 import MessageHandler from 'Handler/message'
-import {MusicCommand} from '.'
+import { MusicCommand } from '.'
 import Music from '..'
 
 export default class Skip extends MusicCommand {
@@ -12,11 +12,11 @@ export default class Skip extends MusicCommand {
 
     async execute(messageHandler: MessageHandler, message: Message) {
         try {
-            this._music.player.stop(true)
+            this._music.clickSkip()
         } catch (e) {
+            message.channel.send('Please try again !')
             console.error("Can't skip the song")
         }
     }
 
-    public help(): void {}
 }
