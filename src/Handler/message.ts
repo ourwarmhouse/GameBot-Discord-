@@ -5,6 +5,7 @@ import {Client, Collection} from 'discord.js'
 import Handler from '.'
 import Constant from '../Constant'
 import Help from '../Command/help'
+import Game from '../Command/Game'
 
 export default class Message extends Handler {
     private _commands = new Collection<string, Command>()
@@ -13,14 +14,15 @@ export default class Message extends Handler {
 
     constructor(client: Client) {
         super(client)
-        const music = new Music()
-        music.commands.forEach(c => this.addCommand(c))
-        const user = new User()
-        user.commands.forEach(c => this.addCommand(c))
-
         const helpCommand = new Help()
-            .addField({ title: 'Music', content: music.helpCommand.getHelpString() })
-        
+        const managerList = [new Music(), new User(), new Game()]
+        for (let manager of managerList) {
+            manager.commands.forEach((c) => this.addCommand(c))
+            helpCommand.addField({
+                title: manager.constructor.name,
+                content: manager.helpCommand.getHelpString(),
+            })
+        }
         this.addCommand(helpCommand)
     }
     public handle() {
@@ -29,7 +31,7 @@ export default class Message extends Handler {
             const commands = message.content
                 .slice(Constant.prefix.length)
                 .split(' ')
-            
+
             //command one character
             let command = commands.shift()
             const args = commands
@@ -37,12 +39,11 @@ export default class Message extends Handler {
             if (!command) return
 
             const aliasToCommand = this._aliases.get(command)
-            
+
             let commandFromCollection = aliasToCommand
                 ? this._commands.get(aliasToCommand)
                 : this._commands.get(command)
             this.commandArgs = args
-            
 
             if (!commandFromCollection) {
                 //command two character
@@ -52,12 +53,11 @@ export default class Message extends Handler {
                 if (!command) return
 
                 const aliasToCommand = this._aliases.get(command)
-                
+
                 commandFromCollection = aliasToCommand
                     ? this._commands.get(aliasToCommand)
                     : this._commands.get(command)
                 this.commandArgs = args
-                
             }
 
             if (!commandFromCollection) return

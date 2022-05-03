@@ -1,7 +1,7 @@
-import { blockQuote } from '@discordjs/builders'
-import { Message, MessageEmbed } from 'discord.js'
+import {blockQuote} from '@discordjs/builders'
+import {Message, MessageEmbed} from 'discord.js'
 import MessageHandler from 'Handler/message'
-import { MusicCommand } from '.'
+import {MusicCommand} from '.'
 import Music from '..'
 
 export default class Help extends MusicCommand {
@@ -16,17 +16,23 @@ export default class Help extends MusicCommand {
             const content = new MessageEmbed()
                 .addField('Music 🎸', helpString)
                 .setColor('LUMINOUS_VIVID_PINK')
-            message.reply({ embeds: [content] })
-            
+            message.reply({embeds: [content]})
         } catch (e) {
             message.channel.send('Please try again !')
-            console.log(e,"Can't send help")
+            console.log(e, "Can't send help")
         }
     }
 
     public getHelpString(): string {
-        const { commands } = this._music
+        const {commands} = this._music
         const myHelpString = super.getHelpString()
-        return commands.filter(c=>c != this).map(c => c.getHelpString()).join('\n') + '\n' + myHelpString
+        return (
+            commands
+                .filter((c) => c != this)
+                .map((c) => c.getHelpString())
+                .join('\n') +
+            '\n' +
+            myHelpString
+        )
     }
 }

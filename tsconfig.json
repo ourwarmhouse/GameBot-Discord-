@@ -5,12 +5,14 @@
         "strict": true,
         "target": "es6",
         "skipLibCheck": true,
-        "baseUrl": "src" /* This is where all your code is*/,
-        "typeRoots": ["./node_modules/@types", "./src/@types"],
+        "allowJs": true,
+        "baseUrl": "./src" /* This is where all your code is*/,
+        "typeRoots": ["./node_modules/@types", "./src/types"],
         "allowSyntheticDefaultImports": true,
         "isolatedModules": true,
-        "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */
-        // "preserveSymlinks": true,                         /* Disable resolving symlinks to their realpath. This correlates to the same flag in node. */
-        // "forceConsistentCasingInFileNames": true /* Ensure that casing is correct in imports. */
-    }
+        "esModuleInterop": true, 
+        // "preserveSymlinks": true,                       
+        "forceConsistentCasingInFileNames": true 
+    },
+    "include": ["src/**/**/**/*"]
 }

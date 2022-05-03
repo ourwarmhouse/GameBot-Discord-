@@ -2,10 +2,10 @@ import {
     AudioPlayerStatus,
     AudioResource,
     createAudioPlayer,
-    VoiceConnection
+    VoiceConnection,
 } from '@discordjs/voice'
-import { Message, TextBasedChannel, VoiceBasedChannel } from 'discord.js'
-import { ComamndManager } from '..'
+import {Message, TextBasedChannel, VoiceBasedChannel} from 'discord.js'
+import {ComamndManager} from '..'
 import HelpCommand from './commands/help'
 import LeaveCommand from './commands/leave'
 import NowPlayingCommand from './commands/nowplaying'
@@ -42,7 +42,7 @@ export default class Music extends ComamndManager {
             new SkipCommand(this),
             new NowPlayingCommand(this),
             new LeaveCommand(this),
-            this._helpCommand
+            this._helpCommand,
         ])
         this.changeConnectionState(new Disconnect())
         this.changeAudioState(new AudioIdle())
@@ -75,7 +75,7 @@ export default class Music extends ComamndManager {
         }
     }
 
-    public clickSkip() { 
+    public clickSkip() {
         this.player.stop()
     }
 
@@ -84,11 +84,11 @@ export default class Music extends ComamndManager {
         this.connectionState.disconnect()
     }
 
-    public clickQueue() { }
+    public clickQueue() {}
 
-    public clickPause() { }
+    public clickPause() {}
 
-    public clickResume() { }
+    public clickResume() {}
 
     public changeAudioState(state: AudioState) {
         this._audioState = state

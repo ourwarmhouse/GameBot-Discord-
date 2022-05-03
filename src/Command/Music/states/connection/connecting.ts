@@ -5,7 +5,7 @@ import State from '.'
 export default class Connecting extends State {
     override connect(message: Message<boolean>): boolean {
         //validate channel
-        console.log("connecting")
+        console.log('connecting')
         if (
             !message.guild ||
             !message.member ||
@@ -26,7 +26,7 @@ export default class Connecting extends State {
         }
 
         //set current voice channel if haven't yet or user want to chose another voice channel
-        const { channel } = message.member.voice
+        const {channel} = message.member.voice
         if (
             !this._music.currentVoiceChannel ||
             channel.id != this._music.currentVoiceChannel.id
@@ -42,7 +42,7 @@ export default class Connecting extends State {
 
         const {status} = this._music.connection.state
         if (status == 'disconnected' || status == 'destroyed') {
-            console.log("rejoin")
+            console.log('rejoin')
             this._music.connection = joinVoiceChannel({
                 channelId: channel.id || '',
                 guildId: message.guild.id,
@@ -52,6 +52,5 @@ export default class Connecting extends State {
         }
 
         return false
-        
     }
 }

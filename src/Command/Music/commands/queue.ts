@@ -31,32 +31,33 @@ export default class Queue extends MusicCommand {
         try {
             const playlist = this._music.queue.current
             let content
-                
+
             if (playlist.length == 0) {
                 content = bold('There are empty queue')
-            }
-            else {
-                content = bold('Current queue:') +
-                '\n\n' +
-                this.getPlaylistString(playlist) +
-                '\n\n' +
-                'There are ' +
-                bold(playlist.length.toString()) +
-                ' with total ' +
-                bold(
-                    `[${formatDuration(
-                        playlist.reduce((acc, ele) => acc + ele.song.duration, 0)
+            } else {
+                content =
+                    bold('Current queue:') +
+                    '\n\n' +
+                    this.getPlaylistString(playlist) +
+                    '\n\n' +
+                    'There are ' +
+                    bold(playlist.length.toString()) +
+                    ' with total ' +
+                    bold(
+                        `[${formatDuration(
+                            playlist.reduce(
+                                (acc, ele) => acc + ele.song.duration,
+                                0
+                            )
                         )}]`
-                        ) +
-                        ' in queue'
+                    ) +
+                    ' in queue'
             }
 
             message.channel.send(content)
-        }
-        catch (e) {
+        } catch (e) {
             message.channel.send('Please try again !')
-            console.log('Can\'t get the queue')
+            console.log("Can't get the queue")
         }
     }
-
 }

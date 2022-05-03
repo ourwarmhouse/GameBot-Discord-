@@ -1,6 +1,6 @@
-import { Message } from 'discord.js'
+import {Message} from 'discord.js'
 import MessageHandler from 'Handler/message'
-import { MusicCommand } from '.'
+import {MusicCommand} from '.'
 import Music from '..'
 
 export default class Skip extends MusicCommand {
@@ -18,5 +18,4 @@ export default class Skip extends MusicCommand {
             console.error("Can't skip the song")
         }
     }
-
 }

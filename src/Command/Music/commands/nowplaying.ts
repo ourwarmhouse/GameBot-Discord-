@@ -1,9 +1,9 @@
-import { hyperlink, inlineCode } from '@discordjs/builders'
+import {hyperlink, inlineCode} from '@discordjs/builders'
 import thounsandFormat from 'aveta'
-import { Message, MessageEmbed } from 'discord.js'
+import {Message, MessageEmbed} from 'discord.js'
 import formatDuration from 'format-duration'
 import MessageHandler from 'Handler/message'
-import { MusicCommand } from '.'
+import {MusicCommand} from '.'
 import Music from '..'
 
 export default class NowPlaying extends MusicCommand {
@@ -22,7 +22,8 @@ export default class NowPlaying extends MusicCommand {
                 song.channel &&
                 song.channel.name &&
                 song.channel.url &&
-                song.title && song.thumbnail?.url &&
+                song.title &&
+                song.thumbnail?.url &&
                 song.channel.icon.url
             ) {
                 const songChannelString = hyperlink(
@@ -30,7 +31,8 @@ export default class NowPlaying extends MusicCommand {
                     song.channel.url
                 )
                 const songString = hyperlink(song.title, song.url)
-                content.addField('Channel', songChannelString)
+                content
+                    .addField('Channel', songChannelString)
                     .setDescription(songString)
                     .setImage(song.thumbnail.url)
                     .setThumbnail(song.channel.icon.url)
@@ -44,14 +46,15 @@ export default class NowPlaying extends MusicCommand {
                         )}/${formatDuration(song.duration)}]`
                     )
                 )
-                    
             }
-            if (song.uploadedAt)
-                content.addField('Release', song.uploadedAt)
-            content.addField('View',thounsandFormat(song.views))
+            if (song.uploadedAt) content.addField('Release', song.uploadedAt)
+            content.addField('View', thounsandFormat(song.views))
             if (song.description)
-                content.addField('Description', song.description.slice(0,20) + '\n' + 'Add by '+ addBy)
-            
+                content.addField(
+                    'Description',
+                    song.description.slice(0, 20) + '\n' + 'Add by ' + addBy
+                )
+
             message.reply({embeds: [content]})
         } catch (e) {
             message.channel.send('Please try again !')

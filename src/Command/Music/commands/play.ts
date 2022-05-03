@@ -1,9 +1,9 @@
-import { bold, inlineCode } from '@discordjs/builders'
+import {bold, inlineCode} from '@discordjs/builders'
 import Constant from '../../../Constant'
-import { Message } from 'discord.js'
+import {Message} from 'discord.js'
 import MessageHandler from 'Handler/message'
-import { Video, YouTube } from 'youtube-sr'
-import { MusicCommand } from '.'
+import {Video, YouTube} from 'youtube-sr'
+import {MusicCommand} from '.'
 import Music from '..'
 
 export default class Play extends MusicCommand {
@@ -16,7 +16,8 @@ export default class Play extends MusicCommand {
 
     private getPlaylistString(playlist: Video[]) {
         return `${playlist
-            .slice(0,this._limitSearch).map(
+            .slice(0, this._limitSearch)
+            .map(
                 (track, idx) =>
                     inlineCode(`[${idx + 1}]`) +
                     track.title +
@@ -25,11 +26,19 @@ export default class Play extends MusicCommand {
             )
             .join('\n')}`
     }
-    private searchForSpecificSong = async (message: Message,searchText: string) => {
+    private searchForSpecificSong = async (
+        message: Message,
+        searchText: string
+    ) => {
         try {
             let result = await YouTube.getVideo(searchText)
             if (!result) throw new Error()
-            const menuContent = `Track ` + bold(result.title || '') + inlineCode(`[${result.durationFormatted}]`) + ' add by ' +bold(message.member?.nickname || 'anonymous') 
+            const menuContent =
+                `Track ` +
+                bold(result.title || '') +
+                inlineCode(`[${result.durationFormatted}]`) +
+                ' add by ' +
+                bold(message.member?.nickname || 'anonymous')
             message.channel.send(menuContent)
             this.music.queue.push(
                 message.member?.nickname || 'anonymous',
@@ -37,45 +46,57 @@ export default class Play extends MusicCommand {
             )
             this.music.clickPlay(message)
             return true
-        }
-        catch (e) {
+        } catch (e) {
             return false
         }
     }
 
-    private searchForPlaylistAndPlay = async (message: Message,searchText: string) => {
+    private searchForPlaylistAndPlay = async (
+        message: Message,
+        searchText: string
+    ) => {
         try {
-            let { videos, videoCount } = await YouTube.getPlaylist(searchText)
+            let {videos, videoCount} = await YouTube.getPlaylist(searchText)
             const menuContent =
-                bold(`Total `) + inlineCode(videoCount.toString()) + bold(` added to queue by`)
-                + inlineCode(message.member?.nickname || 'anonymous') + `\n`
-                + this.getPlaylistString(videos)
+                bold(`Total `) +
+                inlineCode(videoCount.toString()) +
+                bold(` added to queue by`) +
+                inlineCode(message.member?.nickname || 'anonymous') +
+                `\n` +
+                this.getPlaylistString(videos)
             message.channel.send(menuContent)
 
             //get stream and play song
-            videos.forEach(v => this.music.queue.push(
-                message.member?.nickname || 'anonymous',v ))
+            videos.forEach((v) =>
+                this.music.queue.push(
+                    message.member?.nickname || 'anonymous',
+                    v
+                )
+            )
             this.music.clickPlay(message)
             return true
-        }
-        catch (e) {
+        } catch (e) {
             return false
         }
     }
 
-    private searchForListSongAndChose = async (message: Message,searchText: string) => {
+    private searchForListSongAndChose = async (
+        message: Message,
+        searchText: string
+    ) => {
         try {
-            const results = await YouTube.search(
-                searchText,
-                { limit: this.limitSearch, type: 'video' }
-            )
-        
+            const results = await YouTube.search(searchText, {
+                limit: this.limitSearch,
+                type: 'video',
+            })
+
             //display song list
             const menuContent =
                 bold('Chose a track by ') +
                 inlineCode(`1-${this.limitSearch}`) +
                 bold(' command:') +
-                `\n` + this.getPlaylistString(results)
+                `\n` +
+                this.getPlaylistString(results)
             message.channel.send(menuContent)
 
             //let user chose a song
@@ -84,49 +105,50 @@ export default class Play extends MusicCommand {
                 max: 1,
                 time: 15000,
             })
-            collector.on('collect', async (msg) => {
-                //validate the number which user chosed
-                const chooseNumber = Number(msg.content)
-                if (
-                    isNaN(chooseNumber) ||
-                    chooseNumber < 1 ||
-                    chooseNumber > this.limitSearch
-                ) {
-                    message.channel.send('Not an option or a number!')
-                    return
-                }
-                const result = results[chooseNumber - 1]
+            collector
+                .on('collect', async (msg) => {
+                    //validate the number which user chosed
+                    const chooseNumber = Number(msg.content)
+                    if (
+                        isNaN(chooseNumber) ||
+                        chooseNumber < 1 ||
+                        chooseNumber > this.limitSearch
+                    ) {
+                        message.channel.send('Not an option or a number!')
+                        return
+                    }
+                    const result = results[chooseNumber - 1]
 
-                //edit content when song was chosen
+                    //edit content when song was chosen
 
-                const chosedContent =
-                    `Track ` +
-                    inlineCode(`[${chooseNumber}]`) +
-                    ` has been chosen by ` +
-                    bold(msg.member?.nickname || 'anonymous') +
-                    '\n' +
-                    result.title +
-                    ' ' +
-                    inlineCode(`[${result.durationFormatted}]`)
-                if (msg.editable) {
-                    await msg.edit(chosedContent)
-                } else if (msg.deletable) {
-                    await msg.delete()
-                    message.channel.send(chosedContent)
-                } else {
-                    throw new Error("Can't reply user's choosing")
-                }
+                    const chosedContent =
+                        `Track ` +
+                        inlineCode(`[${chooseNumber}]`) +
+                        ` has been chosen by ` +
+                        bold(msg.member?.nickname || 'anonymous') +
+                        '\n' +
+                        result.title +
+                        ' ' +
+                        inlineCode(`[${result.durationFormatted}]`)
+                    if (msg.editable) {
+                        await msg.edit(chosedContent)
+                    } else if (msg.deletable) {
+                        await msg.delete()
+                        message.channel.send(chosedContent)
+                    } else {
+                        throw new Error("Can't reply user's choosing")
+                    }
 
-                //get stream and play song
-                this.music.queue.push(
-                    message.member?.nickname || 'anonymous',
-                    result
-                )
-                this.music.clickPlay(message)
-            }).on('end', (col) => console.log(col))
+                    //get stream and play song
+                    this.music.queue.push(
+                        message.member?.nickname || 'anonymous',
+                        result
+                    )
+                    this.music.clickPlay(message)
+                })
+                .on('end', (col) => console.log(col))
             return true
-        }
-        catch (e) {
+        } catch (e) {
             return false
         }
     }
@@ -135,20 +157,22 @@ export default class Play extends MusicCommand {
             const args = messageHandler.commandArgs[0]
 
             if (Constant.linkRegex.test(args)) {
-                const isPlayAPlaylist = await this.searchForPlaylistAndPlay(message,args)
+                const isPlayAPlaylist = await this.searchForPlaylistAndPlay(
+                    message,
+                    args
+                )
                 if (!isPlayAPlaylist) {
-                    this.searchForSpecificSong(message,args)
+                    this.searchForSpecificSong(message, args)
                 }
-            }
-            else {
-                this.searchForListSongAndChose(message,args)
+            } else {
+                this.searchForListSongAndChose(message, args)
             }
         } catch (e) {
             message.channel.send('Please try again !')
             console.log(e)
         }
     }
-    public get limitSearch(){return this._limitSearch}
+    public get limitSearch() {
+        return this._limitSearch
+    }
 }
-
-

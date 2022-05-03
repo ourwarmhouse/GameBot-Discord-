@@ -18,11 +18,9 @@ export default class Repeat extends MusicCommand {
                 this._music.queue.repeat()
                 message.channel.send(bold('Current queue is repeating'))
             }
-
         } catch (e) {
             message.channel.send('Please try again !')
             console.error("Can't repeat")
         }
     }
-
 }
