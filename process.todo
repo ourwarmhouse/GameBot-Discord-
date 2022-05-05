@@ -1,16 +1,27 @@
 
 Music:
+    ✔ help @done(22-05-05 17:50)
     ✔ play @done(22-05-01 17:08)
     ✔ queue @done(22-05-01 17:08)
     ✔ repeat @done(22-05-01 17:09)
     ✔ skip @done(22-05-01 17:09)
     ✔ nowplaying @done(22-05-01 20:55)
     ✔ leave @done(22-05-02 10:17)
+    ✔ delete @done(22-05-05 17:50)
     ☐ pause
     ☐ resume
     ☐ join
     ☐ export
 
 Game:
+    ✔ help @done(22-05-05 17:50)
+    ✔ bj @done(22-05-05 17:51)
     ☐ math
+
+User:
+    ✔ help @done(22-05-05 17:51)
+    ✔ cash @done(22-05-05 17:51)
+    ✔ daily @done(22-05-05 17:51)
+    ✔ rank @done(22-05-05 17:51)
+    ✔ work @done(22-05-05 17:51)
     

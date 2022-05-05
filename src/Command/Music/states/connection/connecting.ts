@@ -1,22 +1,25 @@
 import {joinVoiceChannel} from '@discordjs/voice'
 import {Message} from 'discord.js'
 import State from '.'
+import Disconnect from './disconnect'
+import Ready from './ready'
 
 export default class Connecting extends State {
-    override connect(message: Message<boolean>): boolean {
+    override connect(message: Message<boolean>) {
         //validate channel
-        console.log('connecting')
         if (
             !message.guild ||
             !message.member ||
             !message.guild.voiceAdapterCreator
         ) {
             message.channel.send('Please try again!')
-            return false
+            this._music.changeConnectionState(new Disconnect())
+            return
         }
         if (!message.member.voice.channel) {
             message.reply('Please join a voice channel to use this!')
-            return false
+            this._music.changeConnectionState(new Disconnect())
+            return
         }
         //push channels which user call bot
         if (
@@ -37,20 +40,20 @@ export default class Connecting extends State {
                 guildId: message.guild.id,
                 adapterCreator: message.guild.voiceAdapterCreator as any,
             })
-            return true
+            this._music.changeConnectionState(new Ready())
+            return
         }
 
         const {status} = this._music.connection.state
         if (status == 'disconnected' || status == 'destroyed') {
-            console.log('rejoin')
             this._music.connection = joinVoiceChannel({
                 channelId: channel.id || '',
                 guildId: message.guild.id,
                 adapterCreator: message.guild.voiceAdapterCreator as any,
             })
-            return true
+            this._music.changeConnectionState(new Ready())
+            return
         }
-
-        return false
+        this._music.changeConnectionState(new Disconnect())
     }
 }

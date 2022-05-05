@@ -462,11 +462,6 @@ detect-libc@^2.0.0:
   resolved "https://registry.yarnpkg.com/detect-libc/-/detect-libc-2.0.1.tgz#e1897aa88fa6ad197862937fbc0441ef352ee0cd"
   integrity sha512-463v3ZeIrcWtdgIg6vI6XUncguvr2TnGl4SzDXinkt9mSLpBJKXT3mW6xT3VQdDN11+WVs29pgvivTc4Lp8v+w==
 
-dh-blackjack@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/dh-blackjack/-/dh-blackjack-1.1.1.tgz#9a54ea275c8ce9fa5ce94f4e68d9a45a4fe9c3cd"
-  integrity sha512-/0530H8O+4Kki9E44EZwt5nlITRXZ3Q0md/tl7w4QWIkhPx/DUdocHGWdBBQS7g8EbcAdvRJf8NIEjWF/AOtSw==
-
 diff@^4.0.1:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
@@ -491,6 +486,14 @@ discord-api-types@^0.32.0:
   version "0.32.0"
   resolved "https://registry.yarnpkg.com/discord-api-types/-/discord-api-types-0.32.0.tgz#e3880d6695372070b7ddbbd2899b2ed6ffd9dea0"
   integrity sha512-i6HyCwWRocvtIcM7hamI3eQTCxLN/UvWtm/JktaXRSWDmASfhHam2juhej+e4U/Q/Fni1uUlyloMCBTL04Dl6Q==
+
+discord-blackjack@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/discord-blackjack/-/discord-blackjack-4.0.0.tgz#b3d6ad06ca74fce777636346a7c97d21ce738986"
+  integrity sha512-7zB6CeG2TsAXUJopaHERj98bVCIBXgseoTiKwSmpg2/6HiR0XszWwLE24P4GpHdRqyP/7BhprFa8WJ170tY63w==
+  dependencies:
+    discord.js "^13.6.0"
+    shuffle-array "^1.0.1"
 
 discord.js@^13.6.0:
   version "13.6.0"
@@ -1128,6 +1131,11 @@ set-blocking@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/set-blocking/-/set-blocking-2.0.0.tgz#045f9782d011ae9a6803ddd382b24392b3d890f7"
   integrity sha1-BF+XgtARrppoA93TgrJDkrPYkPc=
+
+shuffle-array@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/shuffle-array/-/shuffle-array-1.0.1.tgz#c4ff3cfe74d16f93730592301b25e6577b12898b"
+  integrity sha1-xP88/nTRb5NzBZIwGyXmV3sSiYs=
 
 sift@16.0.0:
   version "16.0.0"

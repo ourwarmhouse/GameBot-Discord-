@@ -16,26 +16,31 @@ export default class Daily extends UserCommand {
     }
     async execute(messageHandler: message, message: Message<boolean>) {
         try {
-            const userId = message.author.id
-            const user = await this._userManager.getUser(userId)
+            messageHandler.commandArgs
+            const guildId = message.guildId
+            if (!guildId) throw new Error()
+            const user = await this._userManager.getUser(message.author, guildId)
             if (!user) throw new Error()
             const duration = new Date().getTime() - user.lastDaily.getTime()
-            if (duration < Constant.ONE_HOUR * 24) {
+            if (duration < Constant.HOUR * 24) {
                 message.reply(
-                    'You must waiting ' +
+                    'You must wait ' +
                         inlineCode(
-                            formatDuration(Constant.ONE_HOUR * 24 - duration)
+                            formatDuration(Constant.HOUR * 24 - duration)
                         ) +
                         ' to receive daily gift'
                 )
                 return
             }
             const isReceived = await this._userManager.updateBalance(
-                userId,
+                message.author,
+                guildId,
                 this._amount
             )
             if (!isReceived) throw new Error()
-            await this._userManager.updateUser(userId, {lastDaily: new Date()})
+            await this._userManager.updateUser(message.author, guildId, {
+                lastDaily: new Date(),
+            })
             const amountConverted = currency(this._amount).format()
             const balanceConverted = currency(
                 this._amount + user.balance
@@ -43,7 +48,8 @@ export default class Daily extends UserCommand {
             message.reply(
                 bold('You have received ') +
                     inlineCode('+' + amountConverted) +
-                    +italic('Your current balance ') +
+                    '\n' +
+                    italic('Your current balance ') +
                     inlineCode(balanceConverted)
             )
         } catch (e) {

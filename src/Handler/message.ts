@@ -15,7 +15,8 @@ export default class Message extends Handler {
     constructor(client: Client) {
         super(client)
         const helpCommand = new Help()
-        const managerList = [new Music(), new User(), new Game()]
+        const user = new User()
+        const managerList = [user, new Music(user), new Game(user)]
         for (let manager of managerList) {
             manager.commands.forEach((c) => this.addCommand(c))
             helpCommand.addField({
@@ -32,23 +33,14 @@ export default class Message extends Handler {
                 .slice(Constant.prefix.length)
                 .split(' ')
 
-            //command one character
-            let command = commands.shift()
-            const args = commands
-
-            if (!command) return
-
-            const aliasToCommand = this._aliases.get(command)
-
-            let commandFromCollection = aliasToCommand
-                ? this._commands.get(aliasToCommand)
-                : this._commands.get(command)
-            this.commandArgs = args
-
-            if (!commandFromCollection) {
+            let command
+            let commandFromCollection
+            let args: string[] = []
+            let isFoundCommad = false
+            if (commands[0] && commands[1]) {
+                console.log(commands[0], commands[1])
                 //command two character
-                command += ' ' + commands.shift()
-                const args = commands
+                command = commands[0] + ' ' + commands[1]
 
                 if (!command) return
 
@@ -57,12 +49,33 @@ export default class Message extends Handler {
                 commandFromCollection = aliasToCommand
                     ? this._commands.get(aliasToCommand)
                     : this._commands.get(command)
-                this.commandArgs = args
+
+                if (commandFromCollection) {
+                    args = commands.slice(2)
+                    isFoundCommad = true
+                }
+            }
+            if (isFoundCommad == false && commands[0]) {
+                console.log(commands[0])
+
+                //command one character
+                command = commands[0]
+
+                if (!command) return
+
+                const aliasToCommand = this._aliases.get(command)
+
+                commandFromCollection = aliasToCommand
+                    ? this._commands.get(aliasToCommand)
+                    : this._commands.get(command)
+
+                if (commandFromCollection) args = commands.slice(1)
             }
 
             if (!commandFromCollection) return
 
             try {
+                this.commandArgs = args
                 commandFromCollection.execute(this, message)
             } catch (e) {
                 console.log(e)

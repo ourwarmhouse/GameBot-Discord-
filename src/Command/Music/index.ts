@@ -13,6 +13,7 @@ import PlayCommand from './commands/play'
 import QueueCommand from './commands/queue'
 import RepeatCommand from './commands/repeat'
 import SkipCommand from './commands/skip'
+import DeleteCommand from './commands/delete'
 import MusicQueue from './queue'
 import AudioState from './states/audio'
 import AudioIdle from './states/audio/idle'
@@ -20,8 +21,10 @@ import ConnectionState from './states/connection'
 import Connecting from './states/connection/connecting'
 import Disconnect from './states/connection/disconnect'
 import Ready from './states/connection/ready'
+import UserManager from '../User'
 
 export default class Music extends ComamndManager {
+    protected _userManager: UserManager
     protected _audioState!: AudioState
     public player = createAudioPlayer()
     public queue: MusicQueue
@@ -32,8 +35,9 @@ export default class Music extends ComamndManager {
     private _currentVoiceChannel!: VoiceBasedChannel
     private _textChannelList: TextBasedChannel[] = []
 
-    constructor() {
+    constructor(userManager: UserManager) {
         super()
+        this._userManager = userManager
         this._helpCommand = new HelpCommand(this)
         this._commands = this._commands.concat([
             new PlayCommand(this),
@@ -42,6 +46,7 @@ export default class Music extends ComamndManager {
             new SkipCommand(this),
             new NowPlayingCommand(this),
             new LeaveCommand(this),
+            new DeleteCommand(this),
             this._helpCommand,
         ])
         this.changeConnectionState(new Disconnect())
@@ -62,13 +67,13 @@ export default class Music extends ComamndManager {
         })
     }
 
-    public clickPlay(message: Message) {
-        //get connect if haven't yet
+    public clickConnect(message: Message) {
         this.changeConnectionState(new Connecting())
-        if (this._connectionState.connect(message)) {
-            this.changeConnectionState(new Ready())
-        }
+        this._connectionState.connect(message)
+    }
 
+    public clickPlay(message: Message) {
+        this.clickConnect(message)
         //play audio if connect is established
         if (this._connectionState.isConnect) {
             if (this._connectionState.subscribeAudio()) this._audioState.play()
@@ -112,6 +117,9 @@ export default class Music extends ComamndManager {
     }
     public get currentResource() {
         return this._currentResource
+    }
+    public get userManager() {
+        return this._userManager
     }
     public setCurrentResource(newResource: AudioResource) {
         this._currentResource = newResource

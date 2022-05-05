@@ -5,11 +5,6 @@ import {UserCommand} from '.'
 import User from '..'
 
 export default class Help extends UserCommand {
-    constructor(userManager: User) {
-        super(userManager)
-        this._name = this._name + ' help'
-        this._alias = this._alias + ' h'
-    }
     async execute(messageHandler: MessageHandler, message: Message) {
         try {
             const helpString = this.getHelpString()

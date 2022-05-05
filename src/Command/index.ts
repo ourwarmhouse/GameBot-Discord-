@@ -3,6 +3,7 @@ import Constant from '../Constant'
 import {Message} from 'discord.js'
 import MessageHandler from 'Handler/message'
 import {UserModel} from '../Database'
+import currency from 'currency.js'
 
 export class ComamndManager {
     protected _commands: Command[] = []
@@ -35,15 +36,36 @@ export default abstract class Command {
     public setPrice(newPrice: number) {
         this._price = newPrice
     }
-    public async payForThisCommand(userId: string, newPrice: number) {
-        if (newPrice < 0) return
-        console.log(userId, newPrice)
-        const user = await UserModel.findOneAndUpdate(
-            {userId},
-            {newPrice},
-            {upsert: true}
-        )
-        if (!user) throw new Error("User doesn't exist in database")
+    public async payForThisCommand(
+        message: Message,
+        userId: string,
+        price: number
+    ) {
+        try {
+            if (price == 0) return false
+
+            const user = await UserModel.findOne({userId})
+            if (!user) throw new Error("User doesn't exist in database")
+            if (user.balance < price) {
+                await message.reply(
+                    "You haven't enough money to execute this command 🥱"
+                )
+                return false
+            }
+
+            user.balance = user.balance - price
+            await message.reply(
+                'You have ' +
+                    inlineCode('-' + currency(price).format()) +
+                    ' for this command'
+            )
+            user.save()
+            return true
+        } catch (e) {
+            console.log(e)
+            await message.reply('Please try again')
+            return false
+        }
     }
     public get name() {
         return this._name

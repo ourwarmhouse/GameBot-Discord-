@@ -1,8 +1,12 @@
-import {ComamndManager} from '..'
+import { ComamndManager } from '..'
 import Help from './commands/help'
-import {IUser, UserModel} from '../../Database/index'
+import { IUser, UserModel } from '../../Database/index'
 import Cash from './commands/cash'
 import Daily from './commands/daily'
+import Rank from './commands/rank'
+import Work from './commands/work'
+
+import { User as DiscordUser } from 'discord.js'
 
 export default class User extends ComamndManager {
     constructor() {
@@ -12,53 +16,86 @@ export default class User extends ComamndManager {
             this._helpCommand,
             new Cash(this),
             new Daily(this),
+            new Rank(this),
+            new Work(this)
         ])
     }
-    public async getUser(userId: string) {
+    public async getUser(user: DiscordUser, serverId: string) {
         try {
-            const user = await UserModel.findOne({userId})
-            if (!user) {
-                const newUser = new UserModel({userId})
+            const userFromDatabase = await UserModel.findOne({ userId: user.id, serverId })
+            if (!userFromDatabase) {
+                const newUser = new UserModel({
+                    userId: user.id,
+                    username: user.username,
+                    serverId,
+                })
                 newUser.save()
-                return newUser
+                return null
             }
-            return user
+            return userFromDatabase
         } catch (e) {
             console.log(e)
             return null
         }
     }
-
-    public async getBalance(userId: string) {
+    public async getListUser(serverId: string) {
         try {
-            const user = await this.getUser(userId)
-            if (!user) throw new Error("User doesn't exist in database")
-            return user.balance
+            const listUser = await UserModel.find(
+                { serverId },
+                {},
+                { sort: { balance: -1 } }
+            )
+
+            return listUser
+        } catch (e) {
+            console.log(e)
+            return []
+        }
+    }
+
+    public async getBalance(user: DiscordUser, serverId: string) {
+        try {
+            const userFromDatabase = await this.getUser(user, serverId)
+            if (!userFromDatabase)
+                throw new Error("User doesn't exist in database")
+            return userFromDatabase.balance
         } catch (e) {
             console.log(e)
             return 0
         }
     }
-    public async updateBalance(userId: string, value: number) {
+    public async updateBalance(
+        user: DiscordUser,
+        serverId: string,
+        value: number
+    ) {
         try {
-            const user = await this.getUser(userId)
-            if (!user) throw new Error("User doesn't exist in database")
-            await UserModel.findOneAndUpdate(
-                {userId},
-                {balance: user.balance + value}
-            )
+            const userFromDatabase = await UserModel.findOne({ userId: user.id, serverId })
+            if (!userFromDatabase)
+                throw new Error("User doesn't exist in database")
+            userFromDatabase.balance += value
+            userFromDatabase.save()
             return true
         } catch (e) {
             console.log(e)
             return false
         }
     }
-    public async updateUser(userId: string, userInfo: Partial<IUser>) {
+    public async updateUser(
+        user: DiscordUser,
+        serverId: string,
+        userInfo: Partial<IUser>
+    ) {
         try {
-            const user = await UserModel.findOneAndUpdate({userId}, userInfo, {
-                upsert: true,
-            })
-            return user
+            const userFromDatabase = await UserModel.findOne({ userId: user.id, serverId })
+            if (!userFromDatabase) return null
+            const updatedUser = await UserModel.updateOne
+                ({
+                    userId: userFromDatabase.userId,
+                    serverId: userFromDatabase.serverId
+                },
+                    userInfo)
+            return updatedUser
         } catch (e) {
             console.log(e)
         }

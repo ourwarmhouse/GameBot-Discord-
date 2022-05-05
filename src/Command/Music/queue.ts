@@ -12,6 +12,15 @@ export default class MusicQueue {
         this._queue.push({addBy, song: track})
     }
 
+    public delete(position: number) {
+        if (position >= this._queue.length) this._queue.pop()
+        else this._queue = this._queue.filter((_, idx) => idx != position)
+    }
+
+    public clear() {
+        this._queue = this._queue.slice(0, 1)
+    }
+
     public get current() {
         return this._queue
     }

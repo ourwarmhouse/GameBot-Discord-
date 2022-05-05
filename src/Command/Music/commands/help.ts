@@ -5,11 +5,6 @@ import {MusicCommand} from '.'
 import Music from '..'
 
 export default class Help extends MusicCommand {
-    constructor(_music: Music) {
-        super(_music)
-        this._name = this._name + ' help'
-        this._alias = this._alias + ' h'
-    }
     async execute(messageHandler: MessageHandler, message: Message) {
         try {
             const helpString = this.getHelpString()

@@ -3,7 +3,10 @@ import Constant from '../../Constant'
 
 export interface IUser extends Document {
     userId: string
+    username: string
+    serverId: string
     balance: number
+    lastWork: Date
     lastDaily: Date
 }
 
@@ -12,7 +15,14 @@ const UserSchema = new Schema(
         userId: {
             type: String,
             required: true,
-            unique: true,
+        },
+        username: {
+            type: String,
+            required: true,
+        },
+        serverId: {
+            type: String,
+            required: true,
         },
         balance: {
             type: Number,
@@ -21,7 +31,12 @@ const UserSchema = new Schema(
         lastDaily: {
             type: Date,
             default: () =>
-                new Date(new Date().getTime() - 24 * Constant.ONE_HOUR),
+                new Date(new Date().getTime() - 24 * Constant.HOUR),
+        },
+        lastWork: {
+            type: Date,
+            default: () =>
+                new Date(new Date().getTime() - 3 * Constant.MINUTE),
         },
     },
     {
