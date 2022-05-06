@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import Message from './src/Handler/message'
 import Ready from './src/Handler/ready'
 import AddToServer from './src/Handler/addToServer'
+import { keepAliver } from './keepAliver'
 
 const main = async () => {
     dotenv.config()
@@ -27,4 +28,5 @@ const main = async () => {
     messageHandler.handle()
 }
 
+keepAliver()
 main()
