@@ -14,6 +14,38 @@ export default class Work extends UserCommand {
         this._name = this._name + ' work'
         this._alias = this._alias + ' w'
     }
+    createQuestion():{question:string,answer: string} {
+        let x = Math.round(Math.random() * 20 + 1)
+        let y = Math.round(Math.random() * x + 1)
+        const operatorList = ['+', '-', 'x', '/']
+        const operatorRandom = Math.round(Math.random() * operatorList.length)
+        const question = `Answer the question: ${x} ${operatorList[operatorRandom]} ${y} = ?`
+        let answer 
+        switch (operatorRandom) {
+            case 0:
+                answer = x + y
+                break;
+            case 1:
+                answer = x - y
+                break;
+            case 2:
+                answer = x * y
+                break;
+            case 3:
+                x = Math.round(Math.random() * 200 + 1)
+                y = Math.round(Math.random() * x + 1)
+                while (x % y != 0) {
+                    y = Math.round(Math.random() * x + 1)
+                }
+                answer = x / y
+                break;
+            default:
+                answer = x + y
+                break;
+        }
+        return {question,answer: answer.toString()}
+    }
+
     async execute(messageHandler: message, message: Message<boolean>) {
         try {
             this._amount = Math.round(Math.random() * 1000)
@@ -35,22 +67,36 @@ export default class Work extends UserCommand {
                 )
                 return
             }
-            const isReceived = await this._userManager.updateBalance(
-                message.author,
-                message.guildId,
-                this._amount
-            )
-            if (!isReceived) throw new Error()
-            await this._userManager.updateUser(
-                message.author,
-                message.guildId,
-                {
-                    lastWork: new Date(),
-                }
-            )
-            message.reply(
-                'You are a hard worker. This ' + currency(this._amount).format()
-            ) + ' is your wage'
+
+            const { question, answer } = this.createQuestion()
+            await message.reply(question)
+            const collector = message.channel.createMessageCollector({
+                filter: (msg) => msg.author.id === message.author.id,
+                max: 1,
+                time: 50000,
+            })
+            collector.on('collect', async (msg) => {
+                if (!message.guildId) throw new Error()
+                if (msg.content == answer) {
+                    const isReceived = await this._userManager.updateBalance(
+                        message.author,
+                        message.guildId,
+                        this._amount
+                    )
+                    if (!isReceived) throw new Error()
+                    await this._userManager.updateUser(
+                        message.author,
+                        message.guildId,
+                        {
+                            lastWork: new Date(),
+                        }
+                    )
+                    message.reply(
+                        'You are a hard worker. This ' + currency(this._amount).format()
+                    ) + ' is your wage'
+                } 
+            }).on('end',(collected)=>{})
+
         } catch (e) {
             message.reply('Please try again !')
         }

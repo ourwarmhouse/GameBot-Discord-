@@ -17,7 +17,6 @@ export default class NowPlaying extends MusicCommand {
         try {
             const {song, addBy} = this._music.queue.current[0]
             if (!song) return
-            console.log(song)
             const content = new MessageEmbed().setColor(`LUMINOUS_VIVID_PINK`)
             if (
                 song.channel &&
