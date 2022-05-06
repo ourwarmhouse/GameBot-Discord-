@@ -9,6 +9,7 @@ import Constant from '../../../Constant'
 
 export default class Work extends UserCommand {
     private _amount = 1000
+    private _limitTime = Constant.MINUTE * 3
     constructor(userManager: User) {
         super(userManager)
         this._name = this._name + ' work'
@@ -57,11 +58,11 @@ export default class Work extends UserCommand {
 
             if (!user) throw new Error()
             const duration = new Date().getTime() - user.lastWork.getTime()
-            if (duration < Constant.MINUTE * 3) {
+            if (duration < this._limitTime) {
                 message.reply(
                     'You must relax ' +
                         inlineCode(
-                            formatDuration(Constant.MINUTE * 3 - duration)
+                            formatDuration(this._limitTime - duration)
                         ) +
                         ' before working'
                 )
@@ -92,9 +93,19 @@ export default class Work extends UserCommand {
                         }
                     )
                     message.reply(
-                        'You are a hard worker. This ' + currency(this._amount).format()
-                    ) + ' is your wage'
+                        'You are a hard worker. This ' + currency(this._amount).format() + ' is your wage'
+                    )
                 } 
+                else {
+                    await this._userManager.updateUser(
+                        message.author,
+                        message.guildId,
+                        {
+                            lastWork: new Date(),
+                        }
+                    )
+                    message.reply('Your answer isn\'t correct. Try after ' + inlineCode(formatDuration(this._limitTime)))
+                }
             }).on('end',(collected)=>{})
 
         } catch (e) {

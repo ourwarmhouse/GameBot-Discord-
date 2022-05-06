@@ -9,6 +9,7 @@ import formatDuration from 'format-duration'
 
 export default class Daily extends UserCommand {
     private _amount = 10000
+    private _limitTime = Constant.HOUR * 24
     constructor(userManager: User) {
         super(userManager)
         this._name = this._name + ' daily'
@@ -25,11 +26,11 @@ export default class Daily extends UserCommand {
             )
             if (!user) throw new Error()
             const duration = new Date().getTime() - user.lastDaily.getTime()
-            if (duration < Constant.HOUR * 24) {
+            if (duration < this._limitTime) {
                 message.reply(
                     'You must wait ' +
                         inlineCode(
-                            formatDuration(Constant.HOUR * 24 - duration)
+                            formatDuration(this._limitTime - duration)
                         ) +
                         ' to receive daily gift'
                 )
