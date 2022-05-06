@@ -93,7 +93,9 @@ export default class Work extends UserCommand {
                         }
                     )
                     message.reply(
-                        'You are a hard worker. This ' + currency(this._amount).format() + ' is your wage'
+                        'You are a hard worker. This ' +
+                        inlineCode(currency(this._amount).format()) +
+                        ' is your wage'
                     )
                 } 
                 else {
