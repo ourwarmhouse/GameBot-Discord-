@@ -13,6 +13,8 @@ const main = async () => {
             Intents.FLAGS.GUILDS,
             Intents.FLAGS.GUILD_MESSAGES,
             Intents.FLAGS.GUILD_VOICE_STATES,
+            // Intents.FLAGS.GUILD_MEMBERS,
+            Intents.FLAGS.GUILD_EMOJIS_AND_STICKERS,
         ],
     })
     client.login(process.env.DISCORD_TOKEN)

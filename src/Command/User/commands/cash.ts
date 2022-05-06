@@ -15,7 +15,10 @@ export default class Cash extends UserCommand {
         try {
             const guildId = message.guildId
             if (!guildId) throw new Error()
-            const balance = await this._userManager.getBalance(message.author, guildId)
+            const balance = await this._userManager.getBalance(
+                message.author,
+                guildId
+            )
             const balanceConverted = currency(balance).format()
             message.reply(
                 bold('Your current balance ') + inlineCode(balanceConverted)

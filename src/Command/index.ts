@@ -48,7 +48,7 @@ export default abstract class Command {
             if (!user) throw new Error("User doesn't exist in database")
             if (user.balance < price) {
                 await message.reply(
-                    "You haven't enough money to execute this command 🥱"
+                    "You don't have enough money to execute this command 🥱"
                 )
                 return false
             }

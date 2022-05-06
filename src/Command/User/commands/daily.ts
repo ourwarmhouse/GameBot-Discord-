@@ -19,7 +19,10 @@ export default class Daily extends UserCommand {
             messageHandler.commandArgs
             const guildId = message.guildId
             if (!guildId) throw new Error()
-            const user = await this._userManager.getUser(message.author, guildId)
+            const user = await this._userManager.getUser(
+                message.author,
+                guildId
+            )
             if (!user) throw new Error()
             const duration = new Date().getTime() - user.lastDaily.getTime()
             if (duration < Constant.HOUR * 24) {

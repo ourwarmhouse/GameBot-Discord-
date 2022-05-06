@@ -30,13 +30,11 @@ const UserSchema = new Schema(
         },
         lastDaily: {
             type: Date,
-            default: () =>
-                new Date(new Date().getTime() - 24 * Constant.HOUR),
+            default: () => new Date(new Date().getTime() - 24 * Constant.HOUR),
         },
         lastWork: {
             type: Date,
-            default: () =>
-                new Date(new Date().getTime() - 3 * Constant.MINUTE),
+            default: () => new Date(new Date().getTime() - 3 * Constant.MINUTE),
         },
     },
     {

@@ -12,7 +12,7 @@ export default class Play extends MusicCommand {
         super(_music)
         this._name = this._name + ' play'
         this._alias = this._alias + ' p'
-        this._price = 1000
+        this._price = 100
     }
     private getAuthorName(message: Message) {
         return (

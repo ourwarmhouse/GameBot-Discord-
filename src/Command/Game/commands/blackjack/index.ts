@@ -1,10 +1,12 @@
-import { inlineCode } from '@discordjs/builders'
+import {inlineCode} from '@discordjs/builders'
 import Constant from '../../../../Constant'
 import {Message} from 'discord.js'
 import MessageHandler from 'Handler/message'
 import {GameCommand} from '..'
 import Game from '../..'
-import {Card, GameState, Hand, GameResult, Deck} from './state'
+import {GameState, GameResult} from './state'
+import {Card, Hand, Deck} from './objects'
+import currency from 'currency.js'
 
 export default class BlackJack extends GameCommand {
     constructor(gameManager: Game) {
@@ -16,6 +18,7 @@ export default class BlackJack extends GameCommand {
         try {
             let bet = messageHandler.commandArgs[0]
             let betNumber: number
+
             const guildId = message.guildId
             if (!guildId) {
                 message.reply('Please join a server to execute this command')
@@ -34,13 +37,9 @@ export default class BlackJack extends GameCommand {
                 return
             }
 
-            const gameState = new GameState(
-                message,
-                betNumber,
-                new Deck()
-            )
+            const gameState = new GameState(message, betNumber, new Deck())
 
-            let botMessage = await message.channel.send(gameState.getMessage())
+            const botMessage = await message.reply(gameState.getMessage())
 
             const buttonCollector =
                 message.channel.createMessageComponentCollector({
@@ -53,8 +52,6 @@ export default class BlackJack extends GameCommand {
                     if (interaction.customId === 'hit') gameState.hit()
                     if (interaction.customId === 'stand') gameState.stand()
                     interaction.update(gameState.getMessage())
-
-                    // remove game from games list
                     if (gameState.isOver()) {
                         const {result} = gameState
                         if (
@@ -79,14 +76,29 @@ export default class BlackJack extends GameCommand {
                         buttonCollector.stop()
                     }
                 })
-                .on('end', () => {
+                .on('end', async () => {
+                    if (gameState.isOver()) return
+                    botMessage.edit({
+                        content:
+                            'Your time is up ! ' +
+                            inlineCode('-' + currency(betNumber).format()),
+                        embeds: [],
+                        components: [],
+                    })
+                    await this._gameManager.userManager.updateBalance(
+                        message.author,
+                        guildId,
+                        -betNumber
+                    )
                 })
         } catch (e) {}
     }
 
     public getHelpString(): string {
         return (
-            inlineCode(Constant.prefix + this._name + " [number | 'all' | 'a']") +
+            inlineCode(
+                Constant.prefix + this._name + " [number | 'all' | 'a']"
+            ) +
             ' (' +
             inlineCode(this.alias + " [number | 'all' | 'a']") +
             ')'

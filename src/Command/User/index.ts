@@ -1,12 +1,12 @@
-import { ComamndManager } from '..'
+import {ComamndManager} from '..'
 import Help from './commands/help'
-import { IUser, UserModel } from '../../Database/index'
+import {IUser, UserModel} from '../../Database/index'
 import Cash from './commands/cash'
 import Daily from './commands/daily'
 import Rank from './commands/rank'
 import Work from './commands/work'
-
-import { User as DiscordUser } from 'discord.js'
+import ListEmojis from './commands/listemojis'
+import {User as DiscordUser} from 'discord.js'
 
 export default class User extends ComamndManager {
     constructor() {
@@ -17,16 +17,20 @@ export default class User extends ComamndManager {
             new Cash(this),
             new Daily(this),
             new Rank(this),
-            new Work(this)
+            new Work(this),
+            new ListEmojis(this),
         ])
     }
     public async getUser(user: DiscordUser, serverId: string) {
         try {
-            const userFromDatabase = await UserModel.findOne({ userId: user.id, serverId })
+            const userFromDatabase = await UserModel.findOne({
+                userId: user.id,
+                serverId,
+            })
             if (!userFromDatabase) {
                 const newUser = new UserModel({
                     userId: user.id,
-                    username: user.username,
+                    username: user.username + '#' + user.discriminator,
                     serverId,
                 })
                 newUser.save()
@@ -41,9 +45,9 @@ export default class User extends ComamndManager {
     public async getListUser(serverId: string) {
         try {
             const listUser = await UserModel.find(
-                { serverId },
+                {serverId},
                 {},
-                { sort: { balance: -1 } }
+                {sort: {balance: -1}}
             )
 
             return listUser
@@ -70,7 +74,10 @@ export default class User extends ComamndManager {
         value: number
     ) {
         try {
-            const userFromDatabase = await UserModel.findOne({ userId: user.id, serverId })
+            const userFromDatabase = await UserModel.findOne({
+                userId: user.id,
+                serverId,
+            })
             if (!userFromDatabase)
                 throw new Error("User doesn't exist in database")
             userFromDatabase.balance += value
@@ -87,14 +94,18 @@ export default class User extends ComamndManager {
         userInfo: Partial<IUser>
     ) {
         try {
-            const userFromDatabase = await UserModel.findOne({ userId: user.id, serverId })
+            const userFromDatabase = await UserModel.findOne({
+                userId: user.id,
+                serverId,
+            })
             if (!userFromDatabase) return null
-            const updatedUser = await UserModel.updateOne
-                ({
+            const updatedUser = await UserModel.updateOne(
+                {
                     userId: userFromDatabase.userId,
-                    serverId: userFromDatabase.serverId
+                    serverId: userFromDatabase.serverId,
                 },
-                    userInfo)
+                userInfo
+            )
             return updatedUser
         } catch (e) {
             console.log(e)

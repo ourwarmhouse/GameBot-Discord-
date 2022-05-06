@@ -19,13 +19,15 @@ export default class Rank extends UserCommand {
             )
             const content = new MessageEmbed()
                 .setColor('GREEN')
-                .setTitle('Billionaires | ' + message.guild.name)
+                .setTitle('Billionaires 💵 | ' + message.guild.name)
                 .setDescription(
                     listUser
                         .map(
                             (u, idx) =>
                                 inlineCode('#' + (idx + 1)) +
-                                ' | ' + u.username + ' ' +
+                                ' | ' +
+                                u.username +
+                                ' ' +
                                 inlineCode(`(${currency(u.balance).format()})`)
                         )
                         .join('\n')

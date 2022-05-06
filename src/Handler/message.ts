@@ -38,7 +38,6 @@ export default class Message extends Handler {
             let args: string[] = []
             let isFoundCommad = false
             if (commands[0] && commands[1]) {
-                console.log(commands[0], commands[1])
                 //command two character
                 command = commands[0] + ' ' + commands[1]
 
@@ -56,8 +55,6 @@ export default class Message extends Handler {
                 }
             }
             if (isFoundCommad == false && commands[0]) {
-                console.log(commands[0])
-
                 //command one character
                 command = commands[0]
 

@@ -17,6 +17,7 @@ export default class NowPlaying extends MusicCommand {
         try {
             const {song, addBy} = this._music.queue.current[0]
             if (!song) return
+            console.log(song)
             const content = new MessageEmbed().setColor(`LUMINOUS_VIVID_PINK`)
             if (
                 song.channel &&
@@ -26,16 +27,13 @@ export default class NowPlaying extends MusicCommand {
                 song.thumbnail?.url &&
                 song.channel.icon.url
             ) {
-                const songChannelString = hyperlink(
-                    song.channel.name,
-                    song.channel.url
-                )
-                const songString = hyperlink(song.title, song.url)
+                const {name, url, icon} = song.channel
                 content
-                    .addField('Channel', songChannelString)
-                    .setDescription(songString)
+                    // .addField('Channel', songChannelString)
+                    .setAuthor({name, url, iconURL: icon.url})
+                    .setTitle(song.title)
+                    .setURL(song.url)
                     .setImage(song.thumbnail.url)
-                    .setThumbnail(song.channel.icon.url)
             }
             if (this._music.currentResource) {
                 content.addField(
