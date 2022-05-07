@@ -59,7 +59,7 @@ export default class BlackJack extends GameCommand {
                             result == GameResult.Won
                         )
                             await this._gameManager.userManager.updateBalance(
-                                message.author,
+                                message.author.id,
                                 guildId,
                                 betNumber
                             )
@@ -68,7 +68,7 @@ export default class BlackJack extends GameCommand {
                             result == GameResult.TimeUp
                         )
                             await this._gameManager.userManager.updateBalance(
-                                message.author,
+                                message.author.id,
                                 guildId,
                                 -betNumber
                             )
@@ -86,7 +86,7 @@ export default class BlackJack extends GameCommand {
                         components: [],
                     })
                     await this._gameManager.userManager.updateBalance(
-                        message.author,
+                        message.author.id,
                         guildId,
                         -betNumber
                     )

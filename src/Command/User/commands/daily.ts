@@ -20,7 +20,7 @@ export default class Daily extends UserCommand {
             messageHandler.commandArgs
             const guildId = message.guildId
             if (!guildId) throw new Error()
-            const user = await this._userManager.getUser(
+            const user = await this._userManager.getOrCreateUser(
                 message.author,
                 guildId
             )
@@ -29,20 +29,18 @@ export default class Daily extends UserCommand {
             if (duration < this._limitTime) {
                 message.reply(
                     'You must wait ' +
-                        inlineCode(
-                            formatDuration(this._limitTime - duration)
-                        ) +
+                        inlineCode(formatDuration(this._limitTime - duration)) +
                         ' to receive daily gift'
                 )
                 return
             }
             const isReceived = await this._userManager.updateBalance(
-                message.author,
+                message.author.id,
                 guildId,
                 this._amount
             )
             if (!isReceived) throw new Error()
-            await this._userManager.updateUser(message.author, guildId, {
+            await this._userManager.updateUser(message.author.id, guildId, {
                 lastDaily: new Date(),
             })
             const amountConverted = currency(this._amount).format()

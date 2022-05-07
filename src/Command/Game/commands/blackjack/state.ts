@@ -58,10 +58,13 @@ export class GameState {
             .setCustomId('stand')
 
         // check for player blackjack
-        if (this._playerHand.getValue() == 21)
+        if (this._playerHand.getValue() == 21) {
+            this._dealerHand.cards[1].isHidden = false
             this._result = GameResult.BlackJack
-        else if (this._dealerHand.getValue() == 21)
+        } else if (this._dealerHand.getValue() == 21) {
+            this._dealerHand.cards[1].isHidden = false
             this._result = GameResult.Lost
+        }
     }
 
     public isOver(): boolean {

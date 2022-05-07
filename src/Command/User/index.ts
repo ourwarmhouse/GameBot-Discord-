@@ -7,6 +7,7 @@ import Rank from './commands/rank'
 import Work from './commands/work'
 import ListEmojis from './commands/listemojis'
 import {User as DiscordUser} from 'discord.js'
+import Give from './commands/give'
 
 export default class User extends ComamndManager {
     constructor() {
@@ -19,9 +20,10 @@ export default class User extends ComamndManager {
             new Rank(this),
             new Work(this),
             new ListEmojis(this),
+            new Give(this),
         ])
     }
-    public async getUser(user: DiscordUser, serverId: string) {
+    public async getOrCreateUser(user: DiscordUser, serverId: string) {
         try {
             const userFromDatabase = await UserModel.findOne({
                 userId: user.id,
@@ -36,6 +38,18 @@ export default class User extends ComamndManager {
                 newUser.save()
                 return null
             }
+            return userFromDatabase
+        } catch (e) {
+            console.log(e)
+            return null
+        }
+    }
+    public async findUser(userId: string, serverId: string) {
+        try {
+            const userFromDatabase = await UserModel.findOne({
+                userId,
+                serverId,
+            })
             return userFromDatabase
         } catch (e) {
             console.log(e)
@@ -59,7 +73,7 @@ export default class User extends ComamndManager {
 
     public async getBalance(user: DiscordUser, serverId: string) {
         try {
-            const userFromDatabase = await this.getUser(user, serverId)
+            const userFromDatabase = await this.getOrCreateUser(user, serverId)
             if (!userFromDatabase)
                 throw new Error("User doesn't exist in database")
             return userFromDatabase.balance
@@ -69,13 +83,13 @@ export default class User extends ComamndManager {
         }
     }
     public async updateBalance(
-        user: DiscordUser,
+        userId: string,
         serverId: string,
         value: number
     ) {
         try {
             const userFromDatabase = await UserModel.findOne({
-                userId: user.id,
+                userId,
                 serverId,
             })
             if (!userFromDatabase)
@@ -89,13 +103,13 @@ export default class User extends ComamndManager {
         }
     }
     public async updateUser(
-        user: DiscordUser,
+        userId: string,
         serverId: string,
         userInfo: Partial<IUser>
     ) {
         try {
             const userFromDatabase = await UserModel.findOne({
-                userId: user.id,
+                userId,
                 serverId,
             })
             if (!userFromDatabase) return null
