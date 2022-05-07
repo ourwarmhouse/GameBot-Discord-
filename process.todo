@@ -16,7 +16,18 @@ Music:
 Game:
     ✔ help @done(22-05-05 17:50)
     ✔ blackjack @done(22-05-05 17:51)
-    ☐ exploding_kitten
+    ✔ exploding_kitten
+        - 3 THẺ CÙNG 1 LOẠI: Chọn thẻ ngẫu nhiên trên tay người muốn lấy
+            -> giải pháp: 
+        ☐ 5 THẺ KHÁC LOẠI: Bốc 1 lá từ chồng bài bỏ, phải nhanh trc khi người khác tung lá 
+            -> giải pháp: 
+
+
+        - state: [playing,waiting,drawing_invalid,drawing_valid,giving]
+                -p1: drawing
+                -p2: playing
+                -p3: playing
+            
     ☐ math
 
 User:
