@@ -15,7 +15,12 @@ export default class ExplodingKitten extends GameCommand {
         this._alias = ' ek'
     }
     async execute(messageHandler: MessageHandler, message: Message<boolean>) {
-        
+        try {
+            
+        }
+        catch (e) {
+            
+        }
     }
 
 }
