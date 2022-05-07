@@ -1,11 +1,9 @@
-import User from '..'
-import {Message} from 'discord.js'
-import message from 'Handler/message'
-import {UserCommand} from '.'
+import { inlineCode } from '@discordjs/builders'
 import currency from 'currency.js'
-import {bold, inlineCode, italic} from '@discordjs/builders'
-import Constant from '../../../Constant'
-import formatDuration from 'format-duration'
+import { Message } from 'discord.js'
+import MessageHandler from 'Handler/message'
+import { UserCommand } from '.'
+import User from '..'
 
 export default class Give extends UserCommand {
     constructor(userManager: User) {
@@ -13,7 +11,7 @@ export default class Give extends UserCommand {
         this._name = this._name + ' give'
         this._alias = this._alias + ' g'
     }
-    async execute(messageHandler: message, message: Message<boolean>) {
+    async execute(messageHandler: MessageHandler, message: Message<boolean>) {
         try {
             const toUserTag = messageHandler.commandArgs[0]
             const toUserId = toUserTag.slice(2, -1)
