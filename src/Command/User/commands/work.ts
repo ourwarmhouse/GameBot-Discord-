@@ -1,9 +1,9 @@
-import {inlineCode} from '@discordjs/builders'
+import { inlineCode } from '@discordjs/builders'
 import currency from 'currency.js'
-import {Message} from 'discord.js'
+import { Message } from 'discord.js'
 import formatDuration from 'format-duration'
 import message from 'Handler/message'
-import {UserCommand} from '.'
+import { UserCommand } from '.'
 import User from '..'
 import Constant from '../../../Constant'
 

@@ -64,12 +64,5 @@ export default class Give extends UserCommand {
             message.reply('Please try again !')
         }
     }
-    public getHelpString(): string {
-        return (
-            inlineCode(Constant.prefix + this._name + " [number | 'all' | 'a']") +
-            ' (' +
-            inlineCode(this.alias + " [number | 'all' | 'a']") +
-            ')'
-        )
-    }
+    
 }
