@@ -4,6 +4,7 @@ import { Message } from 'discord.js'
 import MessageHandler from 'Handler/message'
 import { UserCommand } from '.'
 import User from '..'
+import Constant from '../../../Constant'
 
 export default class Give extends UserCommand {
     constructor(userManager: User) {
@@ -61,6 +62,14 @@ export default class Give extends UserCommand {
         } catch (e) {
             message.reply('Please try again !')
         }
+    }
+    public getHelpString(): string {
+        return (
+            inlineCode(Constant.prefix + this._name + " [number | 'all' | 'a']") +
+            ' (' +
+            inlineCode(this.alias + " [number | 'all' | 'a']") +
+            ')'
+        )
     }
     
 }
