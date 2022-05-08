@@ -1,9 +1,9 @@
-import { inlineCode } from '@discordjs/builders'
+import {inlineCode} from '@discordjs/builders'
 import currency from 'currency.js'
-import { Message } from 'discord.js'
+import {Message} from 'discord.js'
 import formatDuration from 'format-duration'
 import message from 'Handler/message'
-import { UserCommand } from '.'
+import {UserCommand} from '.'
 import User from '..'
 import Constant from '../../../Constant'
 
@@ -20,7 +20,7 @@ export default class Work extends UserCommand {
         let y = Math.floor(Math.random() * x + 1)
         const operatorList = ['+', '-', 'x']
         const operatorRandom = Math.floor(Math.random() * operatorList.length)
-        const question = `Answer the question: ${x} ${operatorList[operatorRandom]} ${y} = ?`
+
         let answer
         switch (operatorRandom) {
             case 0:
@@ -38,6 +38,7 @@ export default class Work extends UserCommand {
                 answer = x + y
                 break
         }
+        const question = `Answer the question: ${x} ${operatorList[operatorRandom]} ${y} = ?`
         return {question, answer: answer.toString()}
     }
 

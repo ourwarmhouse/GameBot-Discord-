@@ -4,13 +4,12 @@ import BlackJack from './commands/blackjack'
 import ExplodingKitten from './commands/explodingKitten'
 import Help from './commands/help'
 import ExplodingKittenManager from './commands/explodingKitten/ekManager'
-
-
-
+import BlackJackManager from './commands/blackjack/blackjackManager'
 
 export default class Game extends ComamndManager {
     protected _userManager: UserManager
     protected _explodingKittenGames: ExplodingKittenManager[] = []
+    public blackJackGames: BlackJackManager[] = []
     constructor(userManager: UserManager) {
         super()
         this._userManager = userManager
@@ -23,5 +22,8 @@ export default class Game extends ComamndManager {
     }
     public get userManager() {
         return this._userManager
+    }
+    public get explodingKittenGames() {
+        return this._explodingKittenGames
     }
 }

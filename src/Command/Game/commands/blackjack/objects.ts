@@ -1,4 +1,5 @@
-import {MessageButton, MessageEmbed} from 'discord.js'
+import {Client, MessageButton, MessageEmbed} from 'discord.js'
+import MessageHandler from 'Handler/message'
 
 export interface Suit {
     name: string
@@ -28,12 +29,19 @@ export class Card {
     private _rank: Rank
     private _isHidden: boolean
     private _isAce: boolean
+    private _client: Client
 
-    constructor(suit: Suit, rank: Rank, isHidden: boolean) {
+    constructor(
+        suit: Suit,
+        rank: Rank,
+        client: Client,
+        isHidden: boolean
+    ) {
         this._suit = suit
         this._rank = rank
         this._isHidden = isHidden
-        this._isAce = this._rank.label == 'A' ? true : false
+        this._isAce = this._rank.label == '1' ? true : false
+        this._client = client
     }
 
     public get suit(): Suit {
@@ -56,16 +64,16 @@ export class Card {
     }
 
     public print(): string {
-        let x: string = ''
-        if (!this._isHidden) {
-            x += '**' + this._rank.label + '** '
-            x += this._suit.label
-        } else x += '🔒'
-        return x
+
+        const alias = this._isHidden ? 'lockcard' : this._suit.name + this._rank.label
+        const emoji = this._client.emojis.cache.find((e) => e.name == alias)
+        if (!emoji) return ' '
+
+        return emoji.toString()
     }
 
     public static readonly Rank: Rank[] = [
-        {label: 'A', value: 11}, // this will be adjusted later
+        {label: '1', value: 11}, // this will be adjusted later
         {label: '2', value: 2},
         {label: '3', value: 3},
         {label: '4', value: 4},
@@ -75,27 +83,27 @@ export class Card {
         {label: '8', value: 8},
         {label: '9', value: 9},
         {label: '10', value: 10},
-        {label: 'J', value: 10},
-        {label: 'Q', value: 10},
-        {label: 'K', value: 10},
+        {label: '11', value: 10},
+        {label: '12', value: 10},
+        {label: '13', value: 10},
     ]
 
     public static readonly Suit: Suit[] = [
-        {name: 'Spade', label: '♠'},
-        {name: 'Heart', label: '♥'},
-        {name: 'Club', label: '♣'},
-        {name: 'Diamond', label: '♦'},
+        {name: 's', label: '♠'},
+        {name: 'h', label: '♥'},
+        {name: 'c', label: '♣'},
+        {name: 'd', label: '♦'},
     ]
 }
 
 export class Deck {
     private _cards: Card[] = []
-    constructor() {
+    constructor(public messageHandler: MessageHandler) {
         for (let r in Card.Rank) {
             for (let s in Card.Suit) {
                 const rank = Card.Rank[r] // value between 0 -> 12
                 const suit = Card.Suit[s] // value between 0 -> 3
-                this._cards.push(new Card(suit, rank, false))
+                this._cards.push(new Card(suit, rank, messageHandler.client, false))
             }
         }
         this.shuffle()
@@ -134,13 +142,20 @@ export class Hand {
             total += card.rank.value
         })
 
-        if (total > 21) {
+        if ((total == 21 || total == 22) && this._cards.length == 2)
+            return total
+        if (this._cards.length == 3 && total == 22 && aceStack.length != 0) {
+            total = 21
+            return total
+        }
+        if (total > 21 || this._cards.length > 3) {
             // this is for dynamically changing the value of Ace Card
             for (let i in aceStack) {
                 total -= 10
                 if (total <= 21) return total
             }
         }
+
         return total
     }
 
@@ -149,7 +164,7 @@ export class Hand {
         let x: string = this._cards[0].print()
 
         for (var i = 1; i < this.cards.length; i++) {
-            x += ' - '
+            x += ' '
             x += this.cards[i].print()
 
             if (this.cards[i].isHidden) doShowValue = false
