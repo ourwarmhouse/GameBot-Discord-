@@ -58,12 +58,13 @@ export class GameState {
             .setCustomId('stand')
         
         let BlackJack = 21, DoubleAce = 22
-        let check = 1
+        let checkPlayer = 1
+        let checkDealer = 1
         if (this._playerHand.getValue() == BlackJack) {
-            check = 9
+            checkPlayer = 9
         }
-        if (this._playerHand.getValue() == BlackJack) {
-            check = 9
+        if (this._playerHand.getValue() == DoubleAce) {
+            checkPlayer = 10
         }
         
         // check for player blackjack
