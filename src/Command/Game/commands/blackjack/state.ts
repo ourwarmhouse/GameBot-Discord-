@@ -70,7 +70,7 @@ export class GameState {
             checkDealer = 9
         }
         if (this._dealerHand.getValue() == DoubleAce) {
-            checkPlayer = 10
+            checkDealer = 10
         }
         
         // check for player blackjack
