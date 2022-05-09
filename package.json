@@ -31,6 +31,7 @@
         "opusscript": "^0.0.8",
         "ts-node-dev": "^1.1.8",
         "tweetnacl": "^1.0.3",
+        "uid": "^2.0.0",
         "youtube-sr": "^4.1.17",
         "ytdl": "^1.4.1",
         "ytdl-core": "^4.11.0"
