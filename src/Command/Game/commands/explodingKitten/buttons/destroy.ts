@@ -18,14 +18,16 @@ export class Destroy extends GameButton {
             .setCustomId(this.getCustomId())
             .setStyle(2)
     }
-    public getDestroyGameMesssage(message: Message) {
-        const {defaultAvatarURL, username} = message.author
+    public getDestroyGameMesssage(
+        interaction: MessageComponentInteraction<CacheType>
+    ) {
+        const {defaultAvatarURL, username} = interaction.user
         const embed = new MessageEmbed()
             .setTitle('🐱🎉 Exploding Kittens')
             .setDescription(username + ' has destroyed this game !')
             .setAuthor({
                 name: username,
-                iconURL: message.author.avatarURL() || defaultAvatarURL,
+                iconURL: interaction.user.avatarURL() || defaultAvatarURL,
             })
         return {embeds: [embed], components: []}
     }
@@ -44,19 +46,12 @@ export class Destroy extends GameButton {
                 })
                 return
             }
-            interaction.reply({
-                content: 'This game was destroyed !',
-                ephemeral: true,
-            })
-            ekManager.gameManager.explodingKittenGames =
-                ekManager.gameManager.explodingKittenGames.filter(
-                    (g) => g.id != ekManager.id
-                )
             if (ekManager.botMessage)
                 await ekManager.botMessage.edit(
-                    this.getDestroyGameMesssage(ekManager.message)
+                    this.getDestroyGameMesssage(interaction)
                 )
-            ekManager.buttonCollector.stop()
+
+            ekManager.stop()
         }
     }
 }

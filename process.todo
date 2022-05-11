@@ -42,7 +42,7 @@ Game:
                 -p3: playing
 
         - display number of cards when the deck have lower than 10 cards
-            
+        - random insert fail 
     ☐ math
 
 User:

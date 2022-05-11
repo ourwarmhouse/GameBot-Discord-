@@ -1,15 +1,19 @@
+import {inlineCode} from '@discordjs/builders'
 import Canvas from 'canvas'
 import {CacheType, MessageButton, MessageComponentInteraction} from 'discord.js'
 import path from 'path'
 import {GameButton} from '../buttons'
 import ExplodingKittenManager from '../explodingKittenManager'
+import {Hand} from './hand'
 
 export abstract class Card extends GameButton {
-    constructor(order: number) {
+    protected _order!: number
+    protected _priority!: number
+    constructor(order: number, priority: number) {
         super()
         this._order = order
+        this._priority = priority
     }
-    protected _order!: number
     async getCanvasImage() {
         return await Canvas.loadImage(
             path.join(
@@ -17,6 +21,17 @@ export abstract class Card extends GameButton {
                 `../assets/${this.constructor.name}/${this._order}.png`
             )
         )
+    }
+    dropCard(hand: Hand, ekManager: ExplodingKittenManager) {
+        hand.removeCard(this)
+        if (hand.interaction) {
+            hand.interaction.editReply({
+                components: ekManager.getHandButtons(hand),
+            })
+        }
+    }
+    getPriority() {
+        return this._priority
     }
     getImageUrl() {
         return `https://raw.githubusercontent.com/nnaaaa/DisneyLand/main/src/Command/Game/commands/explodingKitten/assets/${this.constructor.name}/${this._order}.png`
@@ -58,7 +73,12 @@ export class ExplodingKitten extends Card {
     async onClick(
         ekManager: ExplodingKittenManager,
         interaction: MessageComponentInteraction<CacheType>
-    ): Promise<void> {}
+    ): Promise<void> {
+        try {
+        } catch (e) {
+            console.log(e)
+        }
+    }
 }
 
 export class SeeTheFuture extends Card {
@@ -77,7 +97,7 @@ export class SeeTheFuture extends Card {
             const embed = ekManager.getHandEmbed(hand)
             const threeCardAboveDeck = ekManager.deck.cards
                 .slice(0, 3)
-                .map((c) => c.getEmoji() + ' ' + c.getLabel())
+                .map((c) => inlineCode(`${c.getEmoji()} ${c.getLabel()}`))
                 .join('\n')
             embed.setDescription(threeCardAboveDeck)
             await interaction.editReply({
@@ -86,10 +106,13 @@ export class SeeTheFuture extends Card {
             })
             await ekManager.botMessage.edit(
                 await ekManager.getPlayingGameMessage(
-                    hand.info.username + ' is seeing 3 cards above the deck',
+                    hand.info.username +
+                        ' use ' +
+                        inlineCode(`${this.getEmoji()} ${this.getLabel()}`),
                     this.getImageUrl()
                 )
             )
+            super.dropCard(hand, ekManager)
         } catch (e) {
             console.log(e)
             interaction.reply({content: 'Please try again', ephemeral: true})
@@ -106,9 +129,21 @@ export class Shuffle extends Card {
         interaction: MessageComponentInteraction<CacheType>
     ): Promise<void> {
         try {
-            if (interaction.customId !== this.getCustomId()) return
+            const hand = ekManager.hands.find(
+                (h) => h.info.id == interaction.user.id
+            )
+            if (!hand) throw new Error()
             const deck = ekManager.deck
             deck.shuffle()
+            await ekManager.botMessage.edit(
+                await ekManager.getPlayingGameMessage(
+                    hand.info.username +
+                        ' use ' +
+                        inlineCode(`${this.getEmoji()} ${this.getLabel()}`),
+                    this.getImageUrl()
+                )
+            )
+            super.dropCard(hand, ekManager)
         } catch (e) {
             console.log(e)
             interaction.reply({content: 'Please try again', ephemeral: true})
@@ -132,7 +167,31 @@ export class Attack extends Card {
     async onClick(
         ekManager: ExplodingKittenManager,
         interaction: MessageComponentInteraction<CacheType>
-    ): Promise<void> {}
+    ): Promise<void> {
+        try {
+            const hand = ekManager.hands.find(
+                (h) => h.info.id == interaction.user.id
+            )
+            if (!hand) throw new Error()
+            let current = ekManager.getCurrentDrawCard()
+            ekManager.setCurrentDrawCard(0)
+            ekManager.passTurn()
+            ekManager.setCurrentDrawCard(current + 1)
+            ekManager.updateHandMesssage()
+            if (ekManager.botMessage)
+                await ekManager.botMessage.edit(
+                    await ekManager.getPlayingGameMessage(
+                        hand.info.username +
+                            ' use ' +
+                            inlineCode(this.getEmoji() + ' ' + this.getLabel())
+                    )
+                )
+            super.dropCard(hand, ekManager)
+        } catch (e) {
+            console.log(e)
+            interaction.reply({content: 'Please try again', ephemeral: true})
+        }
+    }
 }
 
 export class Skip extends Card {
@@ -144,8 +203,27 @@ export class Skip extends Card {
         interaction: MessageComponentInteraction<CacheType>
     ): Promise<void> {
         try {
-            if (interaction.customId !== this.getCustomId()) return
+            const hand = ekManager.hands.find(
+                (h) => h.info.id == interaction.user.id
+            )
+            if (!hand) throw new Error()
+            // let current = ekManager.getCurrentDrawCard()
+            // if (current > 1){
+            //     current--
+            // } else {
+
+            // }
+            ekManager.setCurrentDrawCard(ekManager.getCurrentDrawCard() - 1)
             ekManager.passTurn()
+            if (ekManager.botMessage)
+                await ekManager.botMessage.edit(
+                    await ekManager.getPlayingGameMessage(
+                        hand.info.username +
+                            ' use ' +
+                            inlineCode(this.getEmoji() + ' ' + this.getLabel())
+                    )
+                )
+            super.dropCard(hand, ekManager)
         } catch (e) {
             console.log(e)
             interaction.reply({content: 'Please try again', ephemeral: true})

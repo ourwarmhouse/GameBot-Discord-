@@ -53,12 +53,10 @@ export class ViewCards extends GameButton {
                     const drawCardButton = new DrawCards()
 
                     if (i.customId == 'View') {
-                        i.reply('Load card...')
-                        i.deleteReply()
-                        await myHand.interaction.editReply({
-                            embeds: [ekManager.getHandEmbed(myHand)],
-                            components: ekManager.getHandButtons(myHand),
-                        })
+                        i.reply({content: 'Load card...', ephemeral: true})
+                        await myHand.interaction.editReply(
+                            ekManager.getHandMessage(myHand)
+                        )
                     } else if (i.customId == drawCardButton.getCustomId()) {
                         i.reply('Draw card...')
                         i.deleteReply()
