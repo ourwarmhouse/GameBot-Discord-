@@ -11,22 +11,12 @@ export class State {
     }
 }
 
-export class Waiting extends State {
+export class Waiting extends State {}
 
-}
+export class Playing extends State {}
 
-export class Playing extends State {
+export class Giving extends State {}
 
-}
+export class DrawingInvalid extends State {}
 
-export class Giving extends State {
-
-}
-
-export class DrawingInvalid extends State {
-    
-}
-
-export class DrawingValid extends State {
-
-}
+export class DrawingValid extends State {}

@@ -29,8 +29,10 @@ export class Start extends GameButton {
                 return
             }
             if (interaction.channel) {
-                await interaction.channel.send('Start !')
-                ekManager.start()
+                // await interaction.channel.send('Start !')
+                await interaction.reply({content: 'Load game ...'})
+                await interaction.deleteReply()
+                await ekManager.start()
                 // await ekManager.botMessage.edit(await this.getStartGameMessage(ekManager))
             }
         }

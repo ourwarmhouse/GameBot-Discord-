@@ -40,6 +40,8 @@ Game:
                 -p1: drawing
                 -p2: playing
                 -p3: playing
+
+        - display number of cards when the deck have lower than 10 cards
             
     ☐ math
 

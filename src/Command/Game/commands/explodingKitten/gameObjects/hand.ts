@@ -1,4 +1,5 @@
-import {Message, User} from 'discord.js'
+import {CacheType, Message, MessageComponentInteraction, User} from 'discord.js'
+import ExplodingKittenManager from '../explodingKittenManager'
 import {Card, Defuse} from './card'
 import {Deck} from './deck'
 
@@ -7,11 +8,20 @@ export class Hand {
     private _deck!: Deck
     private _info: User
     private _isMaster: boolean
-    public message!: Message
+    public interaction!: MessageComponentInteraction<CacheType>
     constructor(info: User, isMaster: boolean) {
         this._cards = []
         this._info = info
         this._isMaster = isMaster
+    }
+    public onDropCard(
+        ekManager: ExplodingKittenManager,
+        interaction: MessageComponentInteraction<CacheType>
+    ) {
+        for (const card of this.cards) {
+            if (card.getCustomId() == interaction.customId)
+                card.onClick(ekManager, this.interaction)
+        }
     }
 
     public get cards(): Card[] {
