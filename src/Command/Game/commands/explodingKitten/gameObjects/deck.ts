@@ -1,25 +1,19 @@
-import ExplodingKittenManager from '../explodingKittenManager'
-import {
-    Attack,
-    Card,
-    Defuse,
-    ExplodingKitten,
-    Favor,
-    Melon,
-    Nope,
-    Potato,
-    Rainbow,
-    SeeTheFuture,
-    Shuffle,
-    Skip,
-    Taco,
-} from './card'
+import {Card} from './Card'
+import {Attack} from './Card/attack'
+import {Defuse} from './Card/defuse'
+import {ExplodingKitten} from './Card/explodingKitten'
+import {Favor} from './Card/favor'
+import {SeeTheFuture} from './Card/seeTheFuture'
+import {Shuffle} from './Card/shuffle'
+import {Skip} from './Card/skip'
 import {Hand} from './hand'
 
 export class Deck {
     private _cards: Card[]
+    private _droppedCards: Card[]
     constructor(private _hands: Hand[]) {
         this._cards = []
+        this._droppedCards = []
         let count = 0
 
         const addCards = (
@@ -41,12 +35,11 @@ export class Deck {
         addCards(4, (order, priority) => new Shuffle(order, priority))
         addCards(4, (order, priority) => new Attack(order, priority))
         addCards(4, (order, priority) => new Skip(order, priority))
-        // addCards(4, (order, priority) => new Favor(order, priority))
+        addCards(4, (order, priority) => new Favor(order, priority))
         // addCards(4, (order, priority) => new Melon(order, priority))
         // addCards(4, (order, priority) => new Taco(order, priority))
         // addCards(4, (order, priority) => new Rainbow(order, priority))
         // addCards(4, (order, priority) => new Potato(order, priority))
-
         // for (let i = 0; i < 5; ++i) {
         //     this._cards.push(new Nope(i,count))
         // }
@@ -74,6 +67,9 @@ export class Deck {
             ]
         }
     }
+    pushToDroppedCards(card: Card) {
+        this._droppedCards.push(card)
+    }
     // addDefuse() {
     //     for (let i = 0; i < 1; ++i) {
     //         this._cards.push(new Defuse(i + this._hands.length))
@@ -84,9 +80,8 @@ export class Deck {
             this._cards.push(new ExplodingKitten(i, 100))
         }
     }
-    insertAt(position:number,card: Card) {
-
-        this._cards = this._cards.splice(position,0, card)
+    insertAt(position: number, card: Card) {
+        this._cards.splice(position, 0, card)
     }
     distributeCards() {
         //distribute defuse
@@ -103,14 +98,14 @@ export class Deck {
                 if (card) hand.cards.push(card)
             }
         }
-        for (const hand of this._hands) {
-            hand.sortCard()
-        }
         // this.addDefuse()
         this.addExploding()
         this.shuffle()
     }
     public get cards() {
         return this._cards
+    }
+    public get droppedCards() {
+        return this._droppedCards
     }
 }

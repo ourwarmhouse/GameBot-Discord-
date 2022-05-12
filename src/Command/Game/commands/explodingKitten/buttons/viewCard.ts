@@ -9,6 +9,7 @@ import {
 import {GameButton} from '.'
 import ExplodingKittenManager from '../explodingKittenManager'
 import {DrawCards} from './drawCard'
+import {SortCards} from './sortCard'
 
 export class ViewCards extends GameButton {
     getCustomId(): string {
@@ -25,68 +26,53 @@ export class ViewCards extends GameButton {
         ekManager: ExplodingKittenManager,
         interaction: MessageComponentInteraction<CacheType>
     ) {
-        if (interaction.customId == this.getCustomId() && interaction.channel) {
-            const myHand = ekManager.hands.find(
-                (h) => h.info.id == interaction.user.id
-            )
-            if (!myHand) return
-            const theSecondClick = new MessageButton()
-                .setLabel('Click here to see cards')
-                .setStyle(3)
-                .setCustomId('View')
-            const row = new MessageActionRow().addComponents(theSecondClick)
+        if (interaction.customId != this.getCustomId()) return
 
-            myHand.interaction = interaction
+        const hand = ekManager.hands.find(
+            (h) => h.info.id == interaction.user.id
+        )
+        if (!hand) return
+        // const theSecondClick = new MessageButton()
+        //     .setLabel('Click here to see cards')
+        //     .setStyle(3)
+        //     .setCustomId('View')
+        // const row = new MessageActionRow().addComponents(theSecondClick)
 
-            myHand.interaction.reply({
-                content: 'Please click the below button',
-                components: [row],
-                ephemeral: true,
-            })
+        interaction.reply({
+            ...ekManager.getHandMessage(hand),
+            ephemeral: true,
+        })
+        hand.interaction = interaction
+        // const btnCollector =
+        //     ekManager.message.channel.createMessageComponentCollector({
+        //         filter: (msg) => msg.user.id == myHand.info.id,
+        //     })
+        // btnCollector.on('collect', async (i) => {
+        //     try {
+        //         const drawCardButton = new DrawCards()
+        //         const sortCardButton = new SortCards()
 
-            const btnCollector =
-                ekManager.message.channel.createMessageComponentCollector({
-                    filter: (msg) => msg.user.id == myHand.info.id,
-                })
-            btnCollector.on('collect', async (i) => {
-                try {
-                    const drawCardButton = new DrawCards()
+        //         if (i.customId == 'View') {
+        //             i.reply({content: 'Load card...', ephemeral: true})
+        //             await myHand.interaction.editReply(
+        //                 ekManager.getHandMessage(myHand)
+        //             )
+        //         } else if (i.customId == drawCardButton.getCustomId()) {
+        //             i.editReply('Draw card...')
+        //             drawCardButton.onClick(ekManager, myHand.interaction)
 
-                    if (i.customId == 'View') {
-                        i.reply({content: 'Load card...', ephemeral: true})
-                        await myHand.interaction.editReply(
-                            ekManager.getHandMessage(myHand)
-                        )
-                    } else if (i.customId == drawCardButton.getCustomId()) {
-                        i.reply('Draw card...')
-                        i.deleteReply()
-                        drawCardButton.onClick(ekManager, myHand.interaction)
-                    } else {
-                        i.reply('Drop card...')
-                        i.deleteReply()
-                        myHand.onDropCard(ekManager, i)
-                    }
-                    // if (!i.channel) return
-                    // const btnClt = i.channel?.createMessageComponentCollector({
-                    //     filter: (msg) => msg.user.id == myHand.info.id,
-                    // })
-                    // btnClt.on('collect', (inter) => {
+        //         } else if (i.customId == sortCardButton.getCustomId()) {
+        //             i.editReply('Draw card...')
+        //         }
+        //         else {
+        //             i.editReply('Drop card...')
+        //             myHand.onDropCard(ekManager, i)
+        //         }
 
-                    // })
-                } catch (e) {
-                    console.log(e)
-                }
-                // await i.reply({content:'Load your card ...',ephemeral:true})
-            })
-            // .on('end', async () => {
-            //     const a = (await interaction.editReply({
-            //         embeds: [ekManager.getHandEmbed(myHand)],
-            //         components: ekManager.getHandButtons(myHand),
-            //     }))
-            //     const b = interaction.message
-            //     // b.({content:'Edit content'})
-            //     myHand.onDropCard(ekManager)
-            // })
-        }
+        //         // })
+        //     } catch (e) {
+        //         console.log(e)
+        //     }
+        // })
     }
 }

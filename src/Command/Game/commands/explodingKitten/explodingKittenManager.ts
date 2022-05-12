@@ -4,6 +4,7 @@ import {
     InteractionCollector,
     Message,
     MessageActionRow,
+    MessageButton,
     MessageComponentInteraction,
     MessageEmbed,
     User,
@@ -16,11 +17,13 @@ import {Destroy} from './buttons/destroy'
 import {DrawCards} from './buttons/drawCard'
 import {Join} from './buttons/join'
 import {Leave} from './buttons/leave'
+import {SortCards} from './buttons/sortCard'
 import {Start} from './buttons/start'
 import {ViewCards} from './buttons/viewCard'
-import {Defuse} from './gameObjects/card'
+import {Defuse} from './gameObjects/Card/defuse'
 import {Deck} from './gameObjects/deck'
 import {Hand} from './gameObjects/hand'
+import { FavorSelect } from './selects/favorSelect'
 
 export default class ExplodingKittenManager {
     public id: string
@@ -49,6 +52,16 @@ export default class ExplodingKittenManager {
         this._turn = 0
         this._userManager = _gameManager.userManager
     }
+    // public getInfoMembersButton(hand: Hand) {
+    //     const row = new MessageActionRow()
+    //     const handsExcepteMe = this.hands.filter(h => h.info.id !== hand.info.id)
+    //     for (const h of handsExcepteMe) {
+    //         const button = new MessageButton().setCustomId(h.info.id).setLabel(h.info.username)
+    //         row.addComponents(button)
+    //     }
+    //     return row
+    // }
+
     public getHandEmbed(hand: Hand) {
         const turn = this.hands[this.turn]
         const info = hand.info
@@ -66,7 +79,7 @@ export default class ExplodingKittenManager {
             .setColor(isMyTurn ? 'GREEN' : 'RED')
         if (isMyTurn)
             embed.setTitle(
-                `You have draw ${this._currentDrawCard} ${
+                `You have to draw ${this._currentDrawCard} ${
                     this._currentDrawCard > 1 ? 'cards' : 'card'
                 }`
             )
@@ -81,6 +94,7 @@ export default class ExplodingKittenManager {
         const drawCardButton = new DrawCards()
             .getComponent()
             .setDisabled(!isMyTurn)
+
         // fuck discord
         const maxColumnPerRow = 5
         const maxRow =
@@ -108,6 +122,12 @@ export default class ExplodingKittenManager {
             }
             rowList.push(r)
         }
+        const sortCardsButton = new SortCards()
+            .getComponent()
+            .setDisabled(!isMyTurn)
+        const utilitiesRow = new MessageActionRow()
+        utilitiesRow.addComponents(sortCardsButton)
+        rowList.push(utilitiesRow)
         return rowList
     }
     public getHandMessage(
@@ -222,13 +242,30 @@ export default class ExplodingKittenManager {
 
             const viewCardsButton = new ViewCards()
 
-            this._buttonCollector.on('collect', async (interaction) => {
-                startButton.onClick(this, interaction)
-                joinButton.onClick(this, interaction)
-                destroyButton.onClick(this, interaction)
-                leaveButton.onClick(this, interaction)
+            const favorSelect = new FavorSelect()
 
-                viewCardsButton.onClick(this, interaction)
+            this._buttonCollector.on('collect', async (interaction) => {
+                if (interaction.isSelectMenu()) {
+                    console.log(interaction.customId)
+                    favorSelect.onSelect(this, interaction)
+                } else if (interaction.isButton()) {
+                    startButton.onClick(this, interaction)
+                    joinButton.onClick(this, interaction)
+                    destroyButton.onClick(this, interaction)
+                    leaveButton.onClick(this, interaction)
+
+                    viewCardsButton.onClick(this, interaction)
+
+                    const hand = this.hands.find(
+                        (h) => h.info.id == interaction.user.id
+                    )
+                    if (!hand) return
+                    const drawCardButton = new DrawCards()
+                    const sortCardButton = new SortCards()
+                    drawCardButton.onClick(this, interaction)
+                    sortCardButton.onClick(this, interaction)
+                    hand.onClickCards(this, interaction)
+                }
             })
         } catch (e) {
             console.log(e)
@@ -257,7 +294,21 @@ export default class ExplodingKittenManager {
     }
 
     leave(id: string) {
+        const hand = this._hands.find((h) => h.info.id != id)
+        if (!hand) return
+        if (this._turn == this._hands.length - 1){
+            this._turn = 0
+        } 
+        // else {
+        //     this._turn++
+        //     this._turn--
+        // }
         this._hands = this._hands.filter((h) => h.info.id != id)
+        this.updateHandMesssage()
+        hand.interaction.editReply(this.getHandMessage(hand))
+//[0,1,2]
+//[]
+
     }
 
     updateHandMesssage() {

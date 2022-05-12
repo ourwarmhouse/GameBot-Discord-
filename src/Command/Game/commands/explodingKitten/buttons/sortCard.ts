@@ -2,9 +2,9 @@ import {CacheType, MessageButton, MessageComponentInteraction} from 'discord.js'
 import {GameButton} from '.'
 import ExplodingKittenManager from '../explodingKittenManager'
 
-export class Start extends GameButton {
+export class SortCards extends GameButton {
     getCustomId(): string {
-        return 'Start'
+        return 'Sort'
     }
     getComponent(): MessageButton {
         return new MessageButton()
@@ -17,20 +17,22 @@ export class Start extends GameButton {
         ekManager: ExplodingKittenManager,
         interaction: MessageComponentInteraction<CacheType>
     ) {
-        if (interaction.customId == this.getCustomId()) {
-            const userFromDiscord = interaction.user
-            if (!interaction.guildId) return
-
-            if (ekManager.master.info.id != userFromDiscord.id) {
-                interaction.reply({
-                    content: 'You have no permission to start game !',
-                    ephemeral: true,
+        try {
+            if (interaction.customId != this.getCustomId()) return
+            const hand = ekManager.hands.find(
+                (h) => h.info.id == interaction.user.id
+            )
+            if (!hand) throw new Error('Invalid hand')
+            hand.sortCard()
+            if (hand.interaction) {
+                hand.interaction.editReply({
+                    components: ekManager.getHandButtons(hand),
                 })
-                return
             }
-
             await interaction.deferUpdate()
-            await ekManager.start()
+            hand.interaction = interaction
+        } catch (e) {
+            console.log(e)
         }
     }
 }

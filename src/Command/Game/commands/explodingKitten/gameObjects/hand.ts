@@ -1,11 +1,9 @@
-import {CacheType, Message, MessageComponentInteraction, User} from 'discord.js'
+import {CacheType, MessageComponentInteraction, User} from 'discord.js'
 import ExplodingKittenManager from '../explodingKittenManager'
-import {Card, Defuse} from './card'
-import {Deck} from './deck'
+import {Card} from './Card'
 
 export class Hand {
     private _cards: Card[]
-    private _deck!: Deck
     private _info: User
     private _isMaster: boolean
     public interaction!: MessageComponentInteraction<CacheType>
@@ -14,13 +12,13 @@ export class Hand {
         this._info = info
         this._isMaster = isMaster
     }
-    public onDropCard(
+    public onClickCards(
         ekManager: ExplodingKittenManager,
         interaction: MessageComponentInteraction<CacheType>
     ) {
         for (const card of this.cards) {
             if (card.getCustomId() == interaction.customId)
-                card.onClick(ekManager, this.interaction)
+                card.onClick(ekManager, interaction)
         }
     }
 
@@ -38,10 +36,6 @@ export class Hand {
 
     public get info() {
         return this._info
-    }
-
-    public setDeck(deck: Deck) {
-        this._deck = deck
     }
 
     public get isMaster() {
