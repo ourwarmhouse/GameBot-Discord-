@@ -35,10 +35,7 @@ export class Join extends GameButton {
                 await ekManager.botMessage.edit(
                     await ekManager.getInitGameMessage()
                 )
-                interaction.reply({
-                    content: 'You have join the game !',
-                    ephemeral: true,
-                })
+                interaction.deferUpdate()
             }
         }
     }

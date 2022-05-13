@@ -3,11 +3,11 @@ import {
     CacheType,
     MessageActionRow,
     MessageComponentInteraction,
-    MessageSelectMenu,
+    MessageSelectMenu
 } from 'discord.js'
 import { Card } from '.'
 import ExplodingKittenManager from '../../explodingKittenManager'
-import { Hand } from '../hand'
+import { FavorSelect } from '../../selects/favorSelect'
 
 export class Favor extends Card {
     getEmoji(): string {
@@ -23,16 +23,16 @@ export class Favor extends Card {
             )
             if (!hand) throw new Error()
 
-            const embed = ekManager.getHandEmbed(hand)
-            embed.setDescription(
+            const embed = ekManager.getHandEmbed(
+                hand,
                 'Choose the player who you want to take the card'
             )
             const handsExcepteMe = ekManager.hands.filter(
                 (h) => h.info.id !== hand.info.id
             )
             const memberMenu = new MessageSelectMenu()
-                .setCustomId('select member')
-                .setPlaceholder('Choose')
+                .setCustomId(FavorSelect.getCustomMemberSelectId())
+                .setPlaceholder('Select one player')
 
             for (const h of handsExcepteMe)
                 memberMenu.addOptions({
@@ -48,40 +48,22 @@ export class Favor extends Card {
                     ],
                 })
             }
-            super.dropCard(hand, ekManager, interaction,false)
+            super.dropCard(hand, ekManager, interaction, false)
             if (ekManager.botMessage)
                 await ekManager.botMessage.edit(
                     await ekManager.getPlayingGameMessage(
                         hand.info.username +
-                        ' use ' +
-                        inlineCode(
-                            this.getEmoji() + ' ' + this.getLabel()
-                        ) +
-                        ' and selecting a player to steal one card',
+                            ' use ' +
+                            inlineCode(
+                                this.getEmoji() + ' ' + this.getLabel()
+                            ) +
+                            ' and selecting a player to steal one card',
                         this.getImageUrl()
                     )
                 )
-
-            
-
-            // if (!interaction.channel) return
-            // const selectMemberCollector =
-            //     interaction.channel.createMessageComponentCollector()
-            //  .on('collect', async (toInteraction) => {
-            //     if (toInteraction.isSelectMenu()) {
-            //         console.log(toInteraction.customId)
-                    
-            //         toInteraction.deferUpdate()
-            //     }
-            // }).on('end', async () => {
-                
-            // })
-
-
-
         } catch (e) {
             console.log(e)
-            interaction.reply({ content: 'Please try again', ephemeral: true })
+            interaction.reply({content: 'Please try again', ephemeral: true})
         }
     }
 }

@@ -9,7 +9,7 @@ import {
 import {GameButton} from '.'
 import ExplodingKittenManager from '../explodingKittenManager'
 import {DrawCards} from './drawCard'
-import {SortCards} from './sortCard'
+import {SortCards} from './sortHandCard'
 
 export class ViewCards extends GameButton {
     getCustomId(): string {

@@ -33,10 +33,7 @@ export class Leave extends GameButton {
                     await ekManager.botMessage.edit(
                         await ekManager.getInitGameMessage()
                     )
-                interaction.reply({
-                    content: 'You left the game !',
-                    ephemeral: true,
-                })
+                interaction.deferUpdate()
                 return
             } else
                 interaction.reply({

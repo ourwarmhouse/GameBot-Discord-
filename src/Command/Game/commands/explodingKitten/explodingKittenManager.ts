@@ -1,29 +1,31 @@
-import {bold, inlineCode} from '@discordjs/builders'
+import { bold, inlineCode } from '@discordjs/builders'
 import {
     CacheType,
     InteractionCollector,
     Message,
-    MessageActionRow,
-    MessageButton,
-    MessageComponentInteraction,
+    MessageActionRow, MessageComponentInteraction,
     MessageEmbed,
-    User,
+    User
 } from 'discord.js'
 import MessageHandler from 'Handler/message'
-import {uid} from 'uid'
+import { uid } from 'uid'
 import GameManager from '../../../Game'
 import UserManager from '../../../User'
-import {Destroy} from './buttons/destroy'
-import {DrawCards} from './buttons/drawCard'
-import {Join} from './buttons/join'
-import {Leave} from './buttons/leave'
-import {SortCards} from './buttons/sortCard'
-import {Start} from './buttons/start'
-import {ViewCards} from './buttons/viewCard'
-import {Defuse} from './gameObjects/Card/defuse'
-import {Deck} from './gameObjects/deck'
-import {Hand} from './gameObjects/hand'
+import { Back } from './buttons/back'
+import { Destroy } from './buttons/destroy'
+import { DrawCards } from './buttons/drawCard'
+import { Join } from './buttons/join'
+import { Leave } from './buttons/leave'
+import { ShuffleCards } from './buttons/shuffleHandCard'
+import { SortCards } from './buttons/sortHandCard'
+import { Start } from './buttons/start'
+import { ViewCards } from './buttons/viewCard'
+import { Defuse } from './gameObjects/Card/defuse'
+import { Cat } from './gameObjects/Card/picture'
+import { Deck } from './gameObjects/deck'
+import { Hand } from './gameObjects/hand'
 import { FavorSelect } from './selects/favorSelect'
+import { PictureSelect } from './selects/pictureSelect'
 
 export default class ExplodingKittenManager {
     public id: string
@@ -62,38 +64,41 @@ export default class ExplodingKittenManager {
     //     return row
     // }
 
-    public getHandEmbed(hand: Hand) {
+    public getHandEmbed(hand: Hand, insertDescription?: string) {
         const turn = this.hands[this.turn]
         const info = hand.info
         const isMyTurn = info.id == turn.info.id
+        const isInGame = this.hands.find((h) => h.info.id == info.id)
         const turnString =
             info.id == turn.info.id
                 ? 'This is your turn ✅'
                 : 'This is not your turn ❌'
+        const outString = 'You have died'
         const embed = new MessageEmbed()
             // .setDescription(`You have ${hand.cards.length} cards`)
             .setAuthor({
-                name: turnString,
+                name: isInGame ? turnString : outString,
                 iconURL: info.avatarURL() || info.defaultAvatarURL,
             })
             .setColor(isMyTurn ? 'GREEN' : 'RED')
         if (isMyTurn)
             embed.setTitle(
-                `You have to draw ${this._currentDrawCard} ${
-                    this._currentDrawCard > 1 ? 'cards' : 'card'
+                `You have to draw ${this._currentDrawCard} ${this._currentDrawCard > 1 ? 'cards' : 'card'
                 }`
             )
+        if (insertDescription) embed.setDescription(insertDescription)
         return embed
     }
     public getHandButtons(hand: Hand) {
         const turn = this.hands[this.turn]
         const info = hand.info
         const isMyTurn = info.id == turn.info.id
+        const isInGame = this.hands.find((h) => h.info.id == info.id)
 
         const numOfButton = hand.cards.length + 1
         const drawCardButton = new DrawCards()
             .getComponent()
-            .setDisabled(!isMyTurn)
+            .setDisabled(!isMyTurn || !isInGame)
 
         // fuck discord
         const maxColumnPerRow = 5
@@ -110,13 +115,24 @@ export default class ExplodingKittenManager {
                     break
                 } else {
                     const card = hand.cards[currentCardIndex]
+
                     let cardComponent
                     if (card.constructor.name == Defuse.name)
                         cardComponent = card.getComponent().setDisabled(true)
-                    else
+                    else if (Cat.isCat(card)) {
+                        const comboTwoOrThreeCards = hand.cards.filter(c => c.getLabel() == card.getLabel())
+                        const comboFiveCards = hand.cards.filter(c => Cat.isCat(c))
                         cardComponent = card
                             .getComponent()
-                            .setDisabled(!isMyTurn)
+                        if (comboTwoOrThreeCards.length <= 1 && comboFiveCards.length < 5)
+                            cardComponent.setDisabled(true)
+                        else {
+                            cardComponent.setDisabled(!isMyTurn || !isInGame)
+                        }
+                    } else
+                        cardComponent = card
+                            .getComponent()
+                            .setDisabled(!isMyTurn || !isInGame)
                     r.addComponents(cardComponent)
                 }
             }
@@ -124,9 +140,12 @@ export default class ExplodingKittenManager {
         }
         const sortCardsButton = new SortCards()
             .getComponent()
-            .setDisabled(!isMyTurn)
+            .setDisabled(!isInGame)
+        const shuffleCardsButton = new ShuffleCards()
+            .getComponent()
+            .setDisabled(!isInGame)
         const utilitiesRow = new MessageActionRow()
-        utilitiesRow.addComponents(sortCardsButton)
+        utilitiesRow.addComponents(sortCardsButton, shuffleCardsButton)
         rowList.push(utilitiesRow)
         return rowList
     }
@@ -139,7 +158,7 @@ export default class ExplodingKittenManager {
         if (insertDescription) embed.setDescription(insertDescription)
         if (thumbnailPath) embed.setThumbnail(thumbnailPath)
         const buttons = this.getHandButtons(hand)
-        return {embeds: [embed], components: buttons}
+        return { embeds: [embed], components: buttons }
     }
 
     public async getPlayingGameMessage(
@@ -147,30 +166,37 @@ export default class ExplodingKittenManager {
         thumbnailPath?: string
     ) {
         const info = this._hands[this._turn].info
-        const {username, defaultAvatarURL, id} = info
+        const { username, defaultAvatarURL, id } = info
 
         if (!insertDescription)
             insertDescription = `Click ${inlineCode(
-                'View cards'
+                'View Cards'
             )} to see your cards`
+        const drawCardString =
+            bold(username) +
+            ' have to draw ' +
+            bold(
+                this._currentDrawCard.toString() +
+                (this._currentDrawCard == 1 ? ' card' : ' cards')
+            )
 
         const userList = this._hands
             .map((h) =>
                 h.info.id == id
                     ? bold(
-                          `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${
-                              h.cards.length
-                          } cards)`
-                      )
-                    : `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${
-                          h.cards.length
-                      } cards)`
+                        `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${h.cards.length
+                        } cards)`
+                    )
+                    : `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${h.cards.length
+                    } cards)`
             )
             .join('\n')
 
         const embed = new MessageEmbed()
             .setTitle('🐱‍👓 Exploding Kittens')
-            .setDescription(insertDescription + '\n\n' + userList)
+            .setDescription(
+                drawCardString + '\n\n' + insertDescription + '\n\n' + userList
+            )
             .setAuthor({
                 name: username + `'s turn`,
                 iconURL: info.avatarURL() || defaultAvatarURL,
@@ -192,7 +218,7 @@ export default class ExplodingKittenManager {
     }
 
     public async getInitGameMessage() {
-        const {username, defaultAvatarURL} = this._message.author
+        const { username, defaultAvatarURL } = this._message.author
         const introducedString =
             username + ' has started a game of Exploding Kittens!'
 
@@ -239,21 +265,24 @@ export default class ExplodingKittenManager {
             const joinButton = new Join()
             const leaveButton = new Leave()
             const destroyButton = new Destroy()
-
             const viewCardsButton = new ViewCards()
-
+            
             const favorSelect = new FavorSelect()
+            const pictureSelect = new PictureSelect()
 
             this._buttonCollector.on('collect', async (interaction) => {
                 if (interaction.isSelectMenu()) {
-                    console.log(interaction.customId)
+                    
+
                     favorSelect.onSelect(this, interaction)
+                    pictureSelect.onSelect(this, interaction)
                 } else if (interaction.isButton()) {
+                    
+
                     startButton.onClick(this, interaction)
                     joinButton.onClick(this, interaction)
                     destroyButton.onClick(this, interaction)
                     leaveButton.onClick(this, interaction)
-
                     viewCardsButton.onClick(this, interaction)
 
                     const hand = this.hands.find(
@@ -262,8 +291,12 @@ export default class ExplodingKittenManager {
                     if (!hand) return
                     const drawCardButton = new DrawCards()
                     const sortCardButton = new SortCards()
+                    const shuffleHandCardButton = new ShuffleCards()
+                    const backButton = new Back()
                     drawCardButton.onClick(this, interaction)
                     sortCardButton.onClick(this, interaction)
+                    shuffleHandCardButton.onClick(this, interaction)
+                    backButton.onClick(this, interaction)
                     hand.onClickCards(this, interaction)
                 }
             })
@@ -296,19 +329,12 @@ export default class ExplodingKittenManager {
     leave(id: string) {
         const hand = this._hands.find((h) => h.info.id != id)
         if (!hand) return
-        if (this._turn == this._hands.length - 1){
+        if (this._turn == this._hands.length - 1) {
             this._turn = 0
-        } 
-        // else {
-        //     this._turn++
-        //     this._turn--
-        // }
+        }
         this._hands = this._hands.filter((h) => h.info.id != id)
         this.updateHandMesssage()
         hand.interaction.editReply(this.getHandMessage(hand))
-//[0,1,2]
-//[]
-
     }
 
     updateHandMesssage() {

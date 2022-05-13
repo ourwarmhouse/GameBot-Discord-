@@ -41,7 +41,7 @@ export class Destroy extends GameButton {
 
             if (ekManager.master.info.id != userFromDiscord.id) {
                 interaction.reply({
-                    content: 'You have no permission to start game !',
+                    content: 'You have no permission to destroy the game !',
                     ephemeral: true,
                 })
                 return

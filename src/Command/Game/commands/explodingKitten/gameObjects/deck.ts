@@ -3,6 +3,7 @@ import {Attack} from './Card/attack'
 import {Defuse} from './Card/defuse'
 import {ExplodingKitten} from './Card/explodingKitten'
 import {Favor} from './Card/favor'
+import { Melon, Potato, Rainbow, Taco } from './Card/picture'
 import {SeeTheFuture} from './Card/seeTheFuture'
 import {Shuffle} from './Card/shuffle'
 import {Skip} from './Card/skip'
@@ -31,15 +32,15 @@ export class Deck {
             (order, priority) => new Defuse(order, priority)
         )
         // addCards(5, (order, priority) => new Nope(order, priority))
-        addCards(5, (order, priority) => new SeeTheFuture(order, priority))
-        addCards(4, (order, priority) => new Shuffle(order, priority))
-        addCards(4, (order, priority) => new Attack(order, priority))
-        addCards(4, (order, priority) => new Skip(order, priority))
-        addCards(4, (order, priority) => new Favor(order, priority))
-        // addCards(4, (order, priority) => new Melon(order, priority))
-        // addCards(4, (order, priority) => new Taco(order, priority))
-        // addCards(4, (order, priority) => new Rainbow(order, priority))
-        // addCards(4, (order, priority) => new Potato(order, priority))
+        // addCards(5, (order, priority) => new SeeTheFuture(order, priority))
+        // addCards(4, (order, priority) => new Shuffle(order, priority))
+        // addCards(4, (order, priority) => new Attack(order, priority))
+        // addCards(4, (order, priority) => new Skip(order, priority))
+        // addCards(4, (order, priority) => new Favor(order, priority))
+        addCards(4, (order, priority) => new Melon(order, priority))
+        addCards(4, (order, priority) => new Taco(order, priority))
+        addCards(4, (order, priority) => new Rainbow(order, priority))
+        addCards(4, (order, priority) => new Potato(order, priority))
         // for (let i = 0; i < 5; ++i) {
         //     this._cards.push(new Nope(i,count))
         // }
@@ -58,12 +59,12 @@ export class Deck {
         //     this._cards.push(new Potato(i,count))
         // }
     }
-    shuffle() {
-        for (let i = this._cards.length - 1; i > 0; --i) {
+    static shuffle(cards: Card[]) {
+        for (let i = cards.length - 1; i > 0; --i) {
             const randomPosition = Math.floor(Math.random() * i)
-            ;[this._cards[i], this._cards[randomPosition]] = [
-                this._cards[randomPosition],
-                this._cards[i],
+            ;[cards[i], cards[randomPosition]] = [
+                cards[randomPosition],
+                cards[i],
             ]
         }
     }
@@ -89,7 +90,7 @@ export class Deck {
             const card = this.cards.shift()
             if (card) hand.cards.push(card)
         }
-        this.shuffle()
+        Deck.shuffle(this._cards)
         //distribute random
         for (let i = 0; i < 4; ++i) {
             for (const hand of this._hands) {
@@ -100,7 +101,7 @@ export class Deck {
         }
         // this.addDefuse()
         this.addExploding()
-        this.shuffle()
+        Deck.shuffle(this._cards)
     }
     public get cards() {
         return this._cards
