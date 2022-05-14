@@ -16,12 +16,7 @@ Music:
 Game:
     ✔ help @done(22-05-05 17:50)
     ✔ blackjack @done(22-05-05 17:51)
-    ✔ exploding_kitten
-        - 3 THẺ CÙNG 1 LOẠI: Chọn thẻ ngẫu nhiên trên tay người muốn lấy
-            -> giải pháp: 
-        ☐ 5 THẺ KHÁC LOẠI: Bốc 1 lá từ chồng bài bỏ, phải nhanh trc khi người khác tung lá 
-            -> giải pháp: 
-
+    ✔ exploding_kitten @done(22-05-14 20:49)
         -> start -> {
             embeds:{
                 all: [turn,remind string about view button,queue of players, bold if their turn]
@@ -32,9 +27,8 @@ Game:
             },
             components:[...],
             files:[]
-        } -> View Card -> hiện private card 
+        } -> private card 
 
-        Chọn nhiều lá 1 lúc, button drop bài
 
         - state: [playing,waiting,drawing_invalid,drawing_valid,giving]
                 -p1: drawing
@@ -43,10 +37,8 @@ Game:
 
         - display number of cards when the deck have lower than 10 cards
         - random insert fail
-        - Nope: + See the future -> alter the future
-        + Attack, Skip ,Shuffle,Favor, 
-        Na -> Thang -> Duc
-        Link hình https://docs.google.com/spreadsheets/d/1Qb1Ua5Ec_MTivXWBgPVAyKDO5OBM99KiEDUGXN1bX3M/edit#gid=625404415`
+        - Nope: + See the future -> alter the future -> + Attack, Skip ,Shuffle,Favor, 
+        Image -> https://docs.google.com/spreadsheets/d/1Qb1Ua5Ec_MTivXWBgPVAyKDO5OBM99KiEDUGXN1bX3M/edit#gid=625404415`
     ☐ math
 
 User:
