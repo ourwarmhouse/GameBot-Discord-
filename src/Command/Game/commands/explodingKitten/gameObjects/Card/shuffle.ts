@@ -2,6 +2,7 @@ import {inlineCode} from '@discordjs/builders'
 import {CacheType, MessageComponentInteraction} from 'discord.js'
 import {Card} from '.'
 import ExplodingKittenManager from '../../explodingKittenManager'
+import {Deck} from '../deck'
 
 export class Shuffle extends Card {
     getEmoji(): string {
@@ -17,16 +18,16 @@ export class Shuffle extends Card {
             )
             if (!hand) throw new Error()
             const deck = ekManager.deck
-            deck.shuffle()
-            super.dropCard(hand, ekManager, interaction)
-            await ekManager.botMessage.edit(
-                await ekManager.getPlayingGameMessage(
-                    hand.info.username +
-                        ' use ' +
-                        inlineCode(`${this.getEmoji()} ${this.getLabel()}`),
-                    this.getImageUrl()
-                )
-            )
+            Deck.shuffle(deck.cards)
+            ekManager.dropCard(hand, [this])
+            const description =
+                hand.info.username +
+                ' use ' +
+                inlineCode(`${this.getEmoji()} ${this.getLabel()}`) +
+                ' and shuffle the deck'
+            ekManager.updateGeneralMessage(description, this.getImageUrl())
+            await interaction.deferUpdate()
+            hand.interaction = interaction
         } catch (e) {
             console.log(e)
             interaction.reply({content: 'Please try again', ephemeral: true})

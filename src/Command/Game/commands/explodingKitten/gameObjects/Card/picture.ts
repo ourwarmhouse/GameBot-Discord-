@@ -7,10 +7,10 @@ import {
     MessageSelectMenu,
 } from 'discord.js'
 import path from 'path'
-import { Card } from '.'
-import { Back } from '../../buttons/back'
+import {Card} from '.'
+import {Back} from '../../buttons/back'
 import ExplodingKittenManager from '../../explodingKittenManager'
-import { PictureSelect } from '../../selects/pictureSelect'
+import {PictureSelect} from '../../selects/pictureSelect'
 
 export abstract class Cat extends Card {
     async getCanvasImage() {
@@ -19,10 +19,12 @@ export abstract class Cat extends Card {
         )
     }
     static isCat(card: Card) {
-        return card.constructor.name == Melon.name ||
+        return (
+            card.constructor.name == Melon.name ||
             card.constructor.name == Taco.name ||
             card.constructor.name == Rainbow.name ||
             card.constructor.name == Potato.name
+        )
     }
     getImageUrl() {
         return `https://raw.githubusercontent.com/nnaaaa/DisneyLand/main/src/Command/Game/commands/explodingKitten/assets/Cats/${this.constructor.name}.png`
@@ -42,7 +44,7 @@ export abstract class Cat extends Card {
             const numOfSameTypeCard = hand.cards.filter(
                 (c) => c.getLabel() == this.getLabel()
             )
-            const numOfCatCard = hand.cards.filter(c => Cat.isCat(c))
+            const numOfCatCard = hand.cards.filter((c) => Cat.isCat(c))
             if (numOfSameTypeCard.length > 1 || numOfCatCard.length == 5) {
                 const embed = ekManager.getHandEmbed(
                     hand,
@@ -55,14 +57,14 @@ export abstract class Cat extends Card {
                 if (numOfSameTypeCard.length >= 2)
                     comboMenu.addOptions({
                         value: 'two card ' + this.getLabel(),
-                        label: 'Two same type cards',
+                        label: '🌈🌈 Two same type cards',
                         description:
                             'steal one card of one player (select random card)',
                     })
                 if (numOfSameTypeCard.length >= 3)
                     comboMenu.addOptions({
                         value: 'three card ' + this.getLabel(),
-                        label: 'Three same type cards',
+                        label: '🌮🌮🌮 Three same type cards',
                         description:
                             'steal one card of one player (select card which you want)',
                     })
@@ -74,21 +76,20 @@ export abstract class Cat extends Card {
                             'select one card in the dropped cards',
                     })
                 }
-                
+
                 if (hand.interaction) {
                     hand.interaction.editReply({
                         embeds: [embed],
                         components: [
                             new MessageActionRow().addComponents(comboMenu),
-                            new MessageActionRow().addComponents(backButton)
+                            new MessageActionRow().addComponents(backButton),
                         ],
                     })
                 }
                 interaction.deferUpdate()
             } else {
-                
             }
-        } catch (e) { }
+        } catch (e) {}
     }
 }
 
@@ -99,7 +100,7 @@ export class Melon extends Cat {
 }
 export class Taco extends Cat {
     getEmoji(): string {
-        return '🥟'
+        return '🌮'
     }
 }
 export class Rainbow extends Cat {

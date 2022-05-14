@@ -1,4 +1,4 @@
-import {bold} from '@discordjs/builders'
+import {bold, inlineCode} from '@discordjs/builders'
 import {
     CacheType,
     MessageActionRow,
@@ -39,18 +39,16 @@ export class FavorSelect {
                 if (!from || !to) return
                 this.owner = to
                 this.selectedHand = from
-                if (ekManager.botMessage)
-                    await ekManager.botMessage.edit(
-                        await ekManager.getPlayingGameMessage(
-                            to.info.username +
-                                ' will steal a card from ' +
-                                from.info.username +
-                                '\n' +
-                                from.info.username +
-                                ' is selecting card for ' +
-                                to.info.username
-                        )
-                    )
+                const description =
+                    to.info.username +
+                    ' will steal a card from ' +
+                    from.info.username +
+                    '\n' +
+                    from.info.username +
+                    ' is selecting card for ' +
+                    to.info.username
+                ekManager.updateGeneralMessage(description)
+
                 if (from.interaction) {
                     const cardsMenu = new MessageSelectMenu()
                         .setCustomId(FavorSelect.getCustomCardsSelectId())
@@ -81,6 +79,7 @@ export class FavorSelect {
                                 )} select one card for you`
                             ),
                         ],
+                        components: [],
                     })
                 }
                 interaction.deferUpdate()
@@ -97,18 +96,30 @@ export class FavorSelect {
                 this.selectedHand.removeCard(card)
                 // to
                 this.owner.cards.push(card)
-                ekManager.updateHandMesssage()
+                ekManager.updateEntireHandMesssage()
 
                 ekManager.passTurn()
 
-                if (ekManager.botMessage)
-                    await ekManager.botMessage.edit(
-                        await ekManager.getPlayingGameMessage(
-                            bold(this.owner.info.username) +
-                                ' has stolen a card from ' +
-                                bold(this.selectedHand.info.username)
+                const description =
+                    bold(this.owner.info.username) +
+                    ' has stolen a card from ' +
+                    bold(this.selectedHand.info.username)
+                ekManager.updateGeneralMessage(description, card.getImageUrl())
+
+                if (this.owner.interaction) {
+                    await this.owner.interaction.editReply(
+                        ekManager.getHandMessage(
+                            this.owner,
+                            `${
+                                this.selectedHand.info.username
+                            } have give ${inlineCode(
+                                card.getEmoji() + ' ' + card.getLabel()
+                            )} to you`,
+                            card.getImageUrl()
                         )
                     )
+                }
+
                 interaction.deferUpdate()
             }
         } catch (e) {}

@@ -1,9 +1,7 @@
 import Canvas from 'canvas'
-import {CacheType, MessageButton, MessageComponentInteraction} from 'discord.js'
+import {MessageButton} from 'discord.js'
 import path from 'path'
 import {GameButton} from '../../buttons'
-import ExplodingKittenManager from '../../explodingKittenManager'
-import {Hand} from '../hand'
 
 export abstract class Card extends GameButton {
     protected _order!: number
@@ -21,42 +19,7 @@ export abstract class Card extends GameButton {
             )
         )
     }
-    async dropCard(
-        hand: Hand,
-        ekManager: ExplodingKittenManager,
-        interaction: MessageComponentInteraction<CacheType>,
-        isUpdateGUI = true
-    ) {
-        hand.removeCard(this)
-        ekManager.deck.pushToDroppedCards(this)
-        if (isUpdateGUI) {
-            if (hand.interaction) {
-                hand.interaction.editReply({
-                    components: ekManager.getHandButtons(hand),
-                })
-            }
-        }
-        await interaction.deferUpdate()
-        hand.interaction = interaction
-    }
-    async dropCards(hand: Hand,cards:Card[],
-        ekManager: ExplodingKittenManager,
-        interaction: MessageComponentInteraction<CacheType>,
-        isUpdateGUI = true) {
-        for (const card of cards) {
-            hand.removeCard(card)
-            ekManager.deck.pushToDroppedCards(this)
-        }
-        if (isUpdateGUI) {
-            if (hand.interaction) {
-                hand.interaction.editReply({
-                    components: ekManager.getHandButtons(hand),
-                })
-            }
-        }
-        await interaction.deferUpdate()
-        hand.interaction = interaction
-    }
+
     getPriority() {
         return this._priority
     }

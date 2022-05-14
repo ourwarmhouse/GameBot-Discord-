@@ -10,7 +10,7 @@ export class Leave extends GameButton {
         return new MessageButton()
             .setLabel(this.getCustomId())
             .setCustomId(this.getCustomId())
-            .setStyle(2)
+            .setStyle(4)
     }
     async onClick(
         ekManager: ExplodingKittenManager,

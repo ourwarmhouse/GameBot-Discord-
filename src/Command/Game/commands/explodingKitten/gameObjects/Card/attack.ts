@@ -16,20 +16,21 @@ export class Attack extends Card {
                 (h) => h.info.id == interaction.user.id
             )
             if (!hand) throw new Error()
+            ekManager.dropCard(hand, [this])
             let current = ekManager.getCurrentDrawCard()
             ekManager.setCurrentDrawCard(0)
             ekManager.passTurn()
             ekManager.setCurrentDrawCard(current + 1)
-            ekManager.updateHandMesssage()
-            super.dropCard(hand, ekManager, interaction)
-            if (ekManager.botMessage)
-                await ekManager.botMessage.edit(
-                    await ekManager.getPlayingGameMessage(
-                        hand.info.username +
-                            ' use ' +
-                            inlineCode(this.getEmoji() + ' ' + this.getLabel())
-                    )
-                )
+            ekManager.updateEntireHandMesssage()
+
+            const description =
+                hand.info.username +
+                ' use ' +
+                inlineCode(this.getEmoji() + ' ' + this.getLabel())
+            ekManager.updateGeneralMessage(description, this.getImageUrl())
+
+            await interaction.deferUpdate()
+            hand.interaction = interaction
         } catch (e) {
             console.log(e)
             interaction.reply({content: 'Please try again', ephemeral: true})

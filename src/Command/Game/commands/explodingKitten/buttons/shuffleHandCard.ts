@@ -1,7 +1,7 @@
 import {CacheType, MessageButton, MessageComponentInteraction} from 'discord.js'
 import {GameButton} from '.'
 import ExplodingKittenManager from '../explodingKittenManager'
-import { Deck } from '../gameObjects/deck'
+import {Deck} from '../gameObjects/deck'
 
 export class ShuffleCards extends GameButton {
     getCustomId(): string {
@@ -14,7 +14,7 @@ export class ShuffleCards extends GameButton {
         return new MessageButton()
             .setLabel(this.getLabel())
             .setCustomId(this.getCustomId())
-            .setStyle(4)
+            .setStyle(1)
     }
 
     async onClick(

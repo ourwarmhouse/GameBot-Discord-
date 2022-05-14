@@ -6,7 +6,7 @@ export class SortCards extends GameButton {
     getCustomId(): string {
         return 'Sort Hand Cards'
     }
-    getLabel(): string{
+    getLabel(): string {
         return 'Sort'
     }
     getComponent(): MessageButton {

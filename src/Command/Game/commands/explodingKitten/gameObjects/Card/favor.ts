@@ -1,13 +1,13 @@
-import { inlineCode } from '@discordjs/builders'
+import {inlineCode} from '@discordjs/builders'
 import {
     CacheType,
     MessageActionRow,
     MessageComponentInteraction,
-    MessageSelectMenu
+    MessageSelectMenu,
 } from 'discord.js'
-import { Card } from '.'
+import {Card} from '.'
 import ExplodingKittenManager from '../../explodingKittenManager'
-import { FavorSelect } from '../../selects/favorSelect'
+import {FavorSelect} from '../../selects/favorSelect'
 
 export class Favor extends Card {
     getEmoji(): string {
@@ -48,19 +48,16 @@ export class Favor extends Card {
                     ],
                 })
             }
-            super.dropCard(hand, ekManager, interaction, false)
-            if (ekManager.botMessage)
-                await ekManager.botMessage.edit(
-                    await ekManager.getPlayingGameMessage(
-                        hand.info.username +
-                            ' use ' +
-                            inlineCode(
-                                this.getEmoji() + ' ' + this.getLabel()
-                            ) +
-                            ' and selecting a player to steal one card',
-                        this.getImageUrl()
-                    )
-                )
+            ekManager.dropCard(hand, [this], false)
+            const description =
+                hand.info.username +
+                ' use ' +
+                inlineCode(this.getEmoji() + ' ' + this.getLabel()) +
+                ' and selecting a player to steal one card'
+            ekManager.updateGeneralMessage(description, this.getImageUrl())
+
+            await interaction.deferUpdate()
+            hand.interaction = interaction
         } catch (e) {
             console.log(e)
             interaction.reply({content: 'Please try again', ephemeral: true})

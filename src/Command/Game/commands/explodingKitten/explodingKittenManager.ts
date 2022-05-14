@@ -3,10 +3,13 @@ import {
     CacheType,
     InteractionCollector,
     Message,
-    MessageActionRow, MessageComponentInteraction,
+    MessageActionRow,
+    MessageComponentInteraction,
     MessageEmbed,
-    User
+    ReplyMessageOptions,
+    User,
 } from 'discord.js'
+import e from 'express'
 import MessageHandler from 'Handler/message'
 import { uid } from 'uid'
 import GameManager from '../../../Game'
@@ -20,6 +23,7 @@ import { ShuffleCards } from './buttons/shuffleHandCard'
 import { SortCards } from './buttons/sortHandCard'
 import { Start } from './buttons/start'
 import { ViewCards } from './buttons/viewCard'
+import { Card } from './gameObjects/Card'
 import { Defuse } from './gameObjects/Card/defuse'
 import { Cat } from './gameObjects/Card/picture'
 import { Deck } from './gameObjects/deck'
@@ -54,17 +58,12 @@ export default class ExplodingKittenManager {
         this._turn = 0
         this._userManager = _gameManager.userManager
     }
-    // public getInfoMembersButton(hand: Hand) {
-    //     const row = new MessageActionRow()
-    //     const handsExcepteMe = this.hands.filter(h => h.info.id !== hand.info.id)
-    //     for (const h of handsExcepteMe) {
-    //         const button = new MessageButton().setCustomId(h.info.id).setLabel(h.info.username)
-    //         row.addComponents(button)
-    //     }
-    //     return row
-    // }
 
-    public getHandEmbed(hand: Hand, insertDescription?: string) {
+    public getHandEmbed(
+        hand: Hand,
+        insertDescription?: string,
+        thumbnailPath?: string
+    ): MessageEmbed {
         const turn = this.hands[this.turn]
         const info = hand.info
         const isMyTurn = info.id == turn.info.id
@@ -87,9 +86,10 @@ export default class ExplodingKittenManager {
                 }`
             )
         if (insertDescription) embed.setDescription(insertDescription)
+        if (thumbnailPath) embed.setThumbnail(thumbnailPath)
         return embed
     }
-    public getHandButtons(hand: Hand) {
+    public getHandButtons(hand: Hand): MessageActionRow[] {
         const turn = this.hands[this.turn]
         const info = hand.info
         const isMyTurn = info.id == turn.info.id
@@ -120,11 +120,17 @@ export default class ExplodingKittenManager {
                     if (card.constructor.name == Defuse.name)
                         cardComponent = card.getComponent().setDisabled(true)
                     else if (Cat.isCat(card)) {
-                        const comboTwoOrThreeCards = hand.cards.filter(c => c.getLabel() == card.getLabel())
-                        const comboFiveCards = hand.cards.filter(c => Cat.isCat(c))
-                        cardComponent = card
-                            .getComponent()
-                        if (comboTwoOrThreeCards.length <= 1 && comboFiveCards.length < 5)
+                        const comboTwoOrThreeCards = hand.cards.filter(
+                            (c) => c.getLabel() == card.getLabel()
+                        )
+                        const comboFiveCards = hand.cards.filter((c) =>
+                            Cat.isCat(c)
+                        )
+                        cardComponent = card.getComponent()
+                        if (
+                            comboTwoOrThreeCards.length <= 1 &&
+                            comboFiveCards.length < 5
+                        )
                             cardComponent.setDisabled(true)
                         else {
                             cardComponent.setDisabled(!isMyTurn || !isInGame)
@@ -153,18 +159,26 @@ export default class ExplodingKittenManager {
         hand: Hand,
         insertDescription?: string,
         thumbnailPath?: string
-    ) {
-        const embed = this.getHandEmbed(hand)
-        if (insertDescription) embed.setDescription(insertDescription)
-        if (thumbnailPath) embed.setThumbnail(thumbnailPath)
+    ): ReplyMessageOptions {
+        const embed = this.getHandEmbed(hand, insertDescription, thumbnailPath)
         const buttons = this.getHandButtons(hand)
-        return { embeds: [embed], components: buttons }
+
+        const isInGame = this.hands.find((h) => h.info.id == hand.info.id)
+        if (!isInGame) {
+            const embed = this.getHandEmbed(hand)
+            embed.setTitle('You died')
+            embed.setDescription("don't be hurt")
+            embed.setImage('https://art.pixilart.com/62256959cd49d04.gif')
+            return { embeds: [embed], components: [] }
+        } else {
+            return { embeds: [embed], components: buttons }
+        }
     }
 
     public async getPlayingGameMessage(
         insertDescription?: string,
         thumbnailPath?: string
-    ) {
+    ): Promise<ReplyMessageOptions> {
         const info = this._hands[this._turn].info
         const { username, defaultAvatarURL, id } = info
 
@@ -193,14 +207,23 @@ export default class ExplodingKittenManager {
             .join('\n')
 
         const embed = new MessageEmbed()
-            .setTitle('🐱‍👓 Exploding Kittens')
-            .setDescription(
-                drawCardString + '\n\n' + insertDescription + '\n\n' + userList
+            .setTitle(
+                `🐱‍👓 Exploding Kittens (remain ${this.deck.cards.length} cards)`
             )
             .setAuthor({
                 name: username + `'s turn`,
                 iconURL: info.avatarURL() || defaultAvatarURL,
             })
+
+        if (this.hands.length == 1) {
+            embed.setDescription(insertDescription)
+            embed.setImage(
+                'https://media1.giphy.com/media/ZYL86UZ7MjeIPDZ4xp/giphy.gif?cid=ecf05e47fp6c3eh9odttk4ma49ljqj425g6ianf2hy2m1v8z&rid=giphy.gif&ct=g'
+            )
+        } else
+            embed.setDescription(
+                drawCardString + '\n\n' + insertDescription + '\n\n' + userList
+            )
 
         if (thumbnailPath) embed.setThumbnail(thumbnailPath)
 
@@ -211,10 +234,16 @@ export default class ExplodingKittenManager {
             destroyButton
         )
 
-        return {
-            embeds: [embed],
-            components: [memberButtons],
-        }
+        if (this.hands.length == 1)
+            return {
+                embeds: [embed],
+                components: [],
+            }
+        else
+            return {
+                embeds: [embed],
+                components: [memberButtons],
+            }
     }
 
     public async getInitGameMessage() {
@@ -266,19 +295,15 @@ export default class ExplodingKittenManager {
             const leaveButton = new Leave()
             const destroyButton = new Destroy()
             const viewCardsButton = new ViewCards()
-            
+
             const favorSelect = new FavorSelect()
             const pictureSelect = new PictureSelect()
 
             this._buttonCollector.on('collect', async (interaction) => {
                 if (interaction.isSelectMenu()) {
-                    
-
                     favorSelect.onSelect(this, interaction)
                     pictureSelect.onSelect(this, interaction)
                 } else if (interaction.isButton()) {
-                    
-
                     startButton.onClick(this, interaction)
                     joinButton.onClick(this, interaction)
                     destroyButton.onClick(this, interaction)
@@ -326,21 +351,53 @@ export default class ExplodingKittenManager {
         this.buttonCollector.stop()
     }
 
-    leave(id: string) {
-        const hand = this._hands.find((h) => h.info.id != id)
+    async leave(id: string) {
+        const hand = this._hands.find((h) => h.info.id == id)
         if (!hand) return
         if (this._turn == this._hands.length - 1) {
             this._turn = 0
         }
         this._hands = this._hands.filter((h) => h.info.id != id)
-        this.updateHandMesssage()
+        this.updateEntireHandMesssage()
         hand.interaction.editReply(this.getHandMessage(hand))
+        if (this.hands.length == 1) {
+            const winner = this._hands[0]
+            if (!winner) return
+            this.updateGeneralMessage(
+                winner.info.username + ' won the game'
+            )
+            if (this._hands[0].interaction) {
+                const embed = this.getHandEmbed(winner)
+                embed.setTitle('You won the game')
+                await this._hands[0].interaction.editReply({ components: [], embeds: [embed] })
+            }
+        }
+        
     }
 
-    updateHandMesssage() {
+    updateEntireHandMesssage() {
         for (const hand of this.hands) {
             if (hand.interaction) {
                 hand.interaction.editReply(this.getHandMessage(hand))
+            }
+        }
+    }
+    async updateGeneralMessage(description: string, thumbnail?: string) {
+        if (this.botMessage)
+            await this.botMessage.edit(
+                await this.getPlayingGameMessage(description, thumbnail)
+            )
+    }
+    dropCard(hand: Hand, cards: Card[], isUpdateGUI = true) {
+        for (const card of cards) {
+            hand.removeCard(card)
+            this.deck.pushToDroppedCards(card)
+        }
+        if (isUpdateGUI) {
+            if (hand.interaction) {
+                hand.interaction.editReply({
+                    components: this.getHandButtons(hand),
+                })
             }
         }
     }
@@ -349,7 +406,7 @@ export default class ExplodingKittenManager {
             this._turn++
             if (this._turn >= this.hands.length) this._turn = 0
             this._currentDrawCard = 1
-            this.updateHandMesssage()
+            this.updateEntireHandMesssage()
         }
     }
 

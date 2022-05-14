@@ -17,6 +17,12 @@ export class SeeTheFuture extends Card {
             )
             if (!hand) throw new Error()
             const embed = ekManager.getHandEmbed(hand)
+            ekManager.dropCard(hand, [this], false)
+            const description =
+                hand.info.username +
+                ' use ' +
+                inlineCode(`${this.getEmoji()} ${this.getLabel()}`)
+            ekManager.updateGeneralMessage(description, this.getImageUrl())
             const threeCardAboveDeck = ekManager.deck.cards
                 .slice(0, 3)
                 .map((c) => inlineCode(`${c.getEmoji()} ${c.getLabel()}`))
@@ -27,15 +33,9 @@ export class SeeTheFuture extends Card {
                     ekManager.getHandMessage(hand, threeCardAboveDeck)
                 )
             }
-            super.dropCard(hand, ekManager, interaction)
-            await ekManager.botMessage.edit(
-                await ekManager.getPlayingGameMessage(
-                    hand.info.username +
-                        ' use ' +
-                        inlineCode(`${this.getEmoji()} ${this.getLabel()}`),
-                    this.getImageUrl()
-                )
-            )
+
+            await interaction.deferUpdate()
+            hand.interaction = interaction
         } catch (e) {
             console.log(e)
             interaction.reply({content: 'Please try again', ephemeral: true})

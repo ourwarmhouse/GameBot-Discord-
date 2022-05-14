@@ -20,20 +20,17 @@ export class Defuse extends Card {
             )
             if (!hand) throw new Error('Invalid hand')
 
-            hand.removeCard(this)
+            ekManager.dropCard(hand, [this])
             ekManager.passTurn()
-            super.dropCard(hand, ekManager, interaction)
-            if (ekManager.botMessage)
-                await ekManager.botMessage.edit(
-                    await ekManager.getPlayingGameMessage(
-                        hand.info.username +
-                            ' use ' +
-                            inlineCode(
-                                this.getEmoji() + ' ' + this.getLabel()
-                            ) +
-                            ' and safe after the exploding'
-                    )
-                )
+            const description =
+                hand.info.username +
+                ' use ' +
+                inlineCode(this.getEmoji() + ' ' + this.getLabel()) +
+                ' and safe after the exploding'
+            ekManager.updateGeneralMessage(description, this.getImageUrl())
+
+            await interaction.deferUpdate()
+            hand.interaction = interaction
         } catch (e) {
             console.log(e)
         }

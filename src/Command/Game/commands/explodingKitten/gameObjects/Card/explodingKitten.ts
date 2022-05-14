@@ -15,14 +15,10 @@ export class ExplodingKitten extends Card {
                 (h) => h.info.id == interaction.user.id
             )
             if (!hand) throw new Error('Invalid hand')
-            if (ekManager.botMessage) {
-                await ekManager.botMessage.edit(
-                    await ekManager.getPlayingGameMessage(
-                        hand.info.username + ' has draw Exploding Kitten',
-                        this.getImageUrl()
-                    )
-                )
-            }
+
+            const description =
+                hand.info.username + ' has draw Exploding Kitten'
+            ekManager.updateGeneralMessage(description, this.getImageUrl())
         } catch (e) {
             console.log(e)
         }

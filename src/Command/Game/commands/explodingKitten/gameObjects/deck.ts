@@ -3,7 +3,7 @@ import {Attack} from './Card/attack'
 import {Defuse} from './Card/defuse'
 import {ExplodingKitten} from './Card/explodingKitten'
 import {Favor} from './Card/favor'
-import { Melon, Potato, Rainbow, Taco } from './Card/picture'
+import {Melon, Potato, Rainbow, Taco} from './Card/picture'
 import {SeeTheFuture} from './Card/seeTheFuture'
 import {Shuffle} from './Card/shuffle'
 import {Skip} from './Card/skip'
@@ -12,17 +12,23 @@ import {Hand} from './hand'
 export class Deck {
     private _cards: Card[]
     private _droppedCards: Card[]
+    private _typeCards: {emoji: string; label: string}[]
     constructor(private _hands: Hand[]) {
+        this._typeCards = []
         this._cards = []
         this._droppedCards = []
         let count = 0
 
+        const addType = (emoji: string, label: string) =>
+            this._typeCards.push({emoji, label})
         const addCards = (
             limit: number,
             createCard: (order: number, priority: number) => Card
         ) => {
             for (let i = 0; i < limit; ++i) {
-                this._cards.push(createCard(i, count))
+                const card = createCard(i, count)
+                if (i == 0) addType(card.getEmoji(), card.getLabel())
+                this._cards.push(card)
             }
             count++
         }
@@ -31,12 +37,13 @@ export class Deck {
             _hands.length + 1,
             (order, priority) => new Defuse(order, priority)
         )
+
         // addCards(5, (order, priority) => new Nope(order, priority))
-        // addCards(5, (order, priority) => new SeeTheFuture(order, priority))
-        // addCards(4, (order, priority) => new Shuffle(order, priority))
-        // addCards(4, (order, priority) => new Attack(order, priority))
-        // addCards(4, (order, priority) => new Skip(order, priority))
-        // addCards(4, (order, priority) => new Favor(order, priority))
+        addCards(5, (order, priority) => new SeeTheFuture(order, priority))
+        addCards(4, (order, priority) => new Shuffle(order, priority))
+        addCards(4, (order, priority) => new Attack(order, priority))
+        addCards(4, (order, priority) => new Skip(order, priority))
+        addCards(4, (order, priority) => new Favor(order, priority))
         addCards(4, (order, priority) => new Melon(order, priority))
         addCards(4, (order, priority) => new Taco(order, priority))
         addCards(4, (order, priority) => new Rainbow(order, priority))
@@ -108,5 +115,8 @@ export class Deck {
     }
     public get droppedCards() {
         return this._droppedCards
+    }
+    public get typeCard() {
+        return this._typeCards
     }
 }

@@ -16,23 +16,22 @@ export class Skip extends Card {
                 (h) => h.info.id == interaction.user.id
             )
             if (!hand) throw new Error()
-            // let current = ekManager.getCurrentDrawCard()
-            // if (current > 1){
-            //     current--
-            // } else {
 
-            // }
             ekManager.setCurrentDrawCard(ekManager.getCurrentDrawCard() - 1)
             ekManager.passTurn()
-            super.dropCard(hand, ekManager, interaction)
-            if (ekManager.botMessage)
-                await ekManager.botMessage.edit(
-                    await ekManager.getPlayingGameMessage(
-                        hand.info.username +
-                            ' use ' +
-                            inlineCode(this.getEmoji() + ' ' + this.getLabel())
-                    )
-                )
+            ekManager.dropCard(hand, [this])
+            if (hand.interaction) {
+                hand.interaction.editReply({
+                    embeds: [ekManager.getHandEmbed(hand)],
+                })
+            }
+            const description =
+                hand.info.username +
+                ' use ' +
+                inlineCode(this.getEmoji() + ' ' + this.getLabel())
+            ekManager.updateGeneralMessage(description, this.getImageUrl())
+            await interaction.deferUpdate()
+            hand.interaction = interaction
         } catch (e) {
             console.log(e)
             interaction.reply({content: 'Please try again', ephemeral: true})
