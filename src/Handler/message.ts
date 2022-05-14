@@ -16,7 +16,7 @@ export default class Message extends Handler {
         super(client)
         const helpCommand = new Help()
         const user = new User()
-        const managerList = [user, new Game(user)]
+        const managerList = [user,new Music(user), new Game(user)]
         for (let manager of managerList) {
             manager.commands.forEach((c) => this.addCommand(c))
             helpCommand.addField({
