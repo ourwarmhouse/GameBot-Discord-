@@ -238,9 +238,7 @@ export default class ExplodingKittenManager {
             const winImages = [
                 'https://media4.giphy.com/media/Sqevo2VpVbgKNQX3bn/giphy.gif?cid=ecf05e47mjztsog7m2xk5snnlmly8nqc70offqmt6ivcl0le&rid=giphy.gif&ct=g',
                 'https://media1.giphy.com/media/ZYL86UZ7MjeIPDZ4xp/giphy.gif?cid=ecf05e47fp6c3eh9odttk4ma49ljqj425g6ianf2hy2m1v8z&rid=giphy.gif&ct=g',
-                'https://media3.giphy.com/media/W08g7o5V6Dk6ru1q9y/200w.webp?cid=ecf05e47mjztsog7m2xk5snnlmly8nqc70offqmt6ivcl0le&rid=200w.webp&ct=g',
-                'https://media0.giphy.com/media/vVegyymxA90fkY8jkE/200w.webp?cid=ecf05e47mjztsog7m2xk5snnlmly8nqc70offqmt6ivcl0le&rid=200w.webp&ct=g',
-                'https://media4.giphy.com/media/nR4L10XlJcSeQ/200.webp?cid=ecf05e47mjztsog7m2xk5snnlmly8nqc70offqmt6ivcl0le&rid=200.webp&ct=g',
+                'https://media2.giphy.com/media/vVegyymxA90fkY8jkE/giphy.gif?cid=790b7611179c4cdc3e9bb9d2fd3e5fc590b1a7b6cde1c17b&rid=giphy.gif&ct=g'
             ]
             let randomImage = Math.floor(Math.random() * (winImages.length - 1))
             embed.setDescription(insertDescription)
