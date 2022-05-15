@@ -45,7 +45,7 @@ export abstract class Cat extends Card {
                 (c) => c.getLabel() == this.getLabel()
             )
             const numOfCatCard = hand.cards.filter((c) => Cat.isCat(c))
-            if (numOfSameTypeCard.length > 1 || numOfCatCard.length == 5) {
+            if (numOfSameTypeCard.length > 1 || numOfCatCard.length >= 5) {
                 const embed = ekManager.getHandEmbed(
                     hand,
                     'Choose the combo card'
@@ -71,9 +71,8 @@ export abstract class Cat extends Card {
                 if (numOfCatCard.length >= 5) {
                     comboMenu.addOptions({
                         value: 'five card ' + this.getLabel(),
-                        label: 'Five cat cards',
-                        description:
-                            'select one card in the dropped cards',
+                        label: '🌈🌮🥔🍉🌮 Five cat cards in the leftmost',
+                        description: 'select one card in the dropped cards',
                     })
                 }
 

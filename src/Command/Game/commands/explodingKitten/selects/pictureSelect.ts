@@ -1,4 +1,4 @@
-import { bold, inlineCode } from '@discordjs/builders'
+import {bold, inlineCode} from '@discordjs/builders'
 import {
     CacheType,
     MessageActionRow,
@@ -6,9 +6,9 @@ import {
     MessageSelectMenu,
 } from 'discord.js'
 import ExplodingKittenManager from '../explodingKittenManager'
-import { Card } from '../gameObjects/Card'
-import { Cat } from '../gameObjects/Card/picture'
-import { Hand } from '../gameObjects/hand'
+import {Card} from '../gameObjects/Card'
+import {Cat} from '../gameObjects/Card/picture'
+import {Hand} from '../gameObjects/hand'
 
 export class PictureSelect {
     public owner!: Hand
@@ -67,11 +67,11 @@ export class PictureSelect {
                         ' use 2 card ' +
                         inlineCode(
                             representCard.getEmoji() +
-                            ' ' +
-                            representCard.getLabel()
+                                ' ' +
+                                representCard.getLabel()
                         ) +
                         ' and selecting a player to steal one card'
-                    ekManager.updateGeneralMessage(
+                    await ekManager.updateGeneralMessage(
                         description,
                         representCard.getImageUrl()
                     )
@@ -96,7 +96,7 @@ export class PictureSelect {
                         })
 
                     if (hand.interaction) {
-                        hand.interaction.editReply({
+                        await hand.interaction.editReply({
                             embeds: [embed],
                             components: [
                                 new MessageActionRow().addComponents(
@@ -106,6 +106,7 @@ export class PictureSelect {
                         })
                     }
                     ekManager.dropCard(hand, twoCard, false)
+                    ekManager.updateHistory(hand, twoCard)
 
                     await interaction.deferUpdate()
                     hand.interaction = interaction
@@ -121,11 +122,11 @@ export class PictureSelect {
                         ' use 3 card ' +
                         inlineCode(
                             representCard.getEmoji() +
-                            ' ' +
-                            representCard.getLabel()
+                                ' ' +
+                                representCard.getLabel()
                         ) +
                         ' and selecting a player to steal exactly one card'
-                    ekManager.updateGeneralMessage(
+                    await ekManager.updateGeneralMessage(
                         description,
                         representCard.getImageUrl()
                     )
@@ -150,7 +151,7 @@ export class PictureSelect {
                         })
 
                     if (hand.interaction) {
-                        hand.interaction.editReply({
+                        await hand.interaction.editReply({
                             embeds: [embed],
                             components: [
                                 new MessageActionRow().addComponents(
@@ -160,31 +161,44 @@ export class PictureSelect {
                         })
                     }
                     ekManager.dropCard(hand, threeCard, false)
-
+                    ekManager.updateHistory(hand, threeCard)
                     await interaction.deferUpdate()
                     hand.interaction = interaction
                 } else if (combo == 'five card') {
-                    const fiveCards = hand.cards.filter((c) =>
-                        Cat.isCat(c)
-                    ).slice(0, 5)
+                    if (ekManager.deck.droppedCards.length == 0) {
+                        if (hand.interaction) {
+                            await hand.interaction.editReply(
+                                ekManager.getHandMessage(
+                                    hand,
+                                    "Can't use this combo because the game has started"
+                                )
+                            )
+                        }
+                        await interaction.deferUpdate()
+                        hand.interaction = interaction
+                        return
+                    }
+
+                    const fiveCards = hand.cards
+                        .filter((c) => Cat.isCat(c))
+                        .slice(0, 5)
                     if (fiveCards.length < 5) throw new Error()
                     const representCard = fiveCards[0]
                     this.owner = hand
-
+                    const listOfCardsUseString = fiveCards
+                        .map((c) =>
+                            inlineCode(c.getEmoji() + ' ' + c.getLabel())
+                        )
+                        .join('\n')
                     const description =
                         hand.info.username +
-                        ' use 5 card ' +
-                        inlineCode(
-                            representCard.getEmoji() +
-                            ' ' +
-                            representCard.getLabel()
-                        ) +
-                        ' and selecting one card from dropped deck'
-                    ekManager.updateGeneralMessage(
+                        ' use 5 card \n' +
+                        listOfCardsUseString +
+                        '\nand selecting one card from dropped deck'
+                    await ekManager.updateGeneralMessage(
                         description,
                         representCard.getImageUrl()
                     )
-
                     const embed = ekManager.getHandEmbed(
                         hand,
                         'Choose one card from the dropped deck'
@@ -201,19 +215,16 @@ export class PictureSelect {
                             label: c.getEmoji() + ' ' + c.getLabel(),
                         })
                     }
-
                     if (hand.interaction) {
-                        hand.interaction.editReply({
+                        await hand.interaction.editReply({
                             embeds: [embed],
                             components: [
-                                new MessageActionRow().addComponents(
-                                    cardMenu
-                                ),
+                                new MessageActionRow().addComponents(cardMenu),
                             ],
                         })
                     }
                     ekManager.dropCard(hand, fiveCards, false)
-
+                    ekManager.updateHistory(hand, fiveCards)
                     await interaction.deferUpdate()
                     hand.interaction = interaction
                 }
@@ -244,7 +255,7 @@ export class PictureSelect {
                 PictureSelect.getCustomFiveCardSelectDroppedCard()
             )
                 this.onSelectDroppedCard(ekManager, interaction)
-        } catch (e) { }
+        } catch (e) {}
     }
 
     async onTwoCardSelectMember(
@@ -354,7 +365,10 @@ export class PictureSelect {
                 bold(this.owner.info.username) +
                 ' has stolen a card from ' +
                 bold(this.selectedHand.info.username)
-            ekManager.updateGeneralMessage(description, card.getImageUrl())
+            await ekManager.updateGeneralMessage(
+                description,
+                card.getImageUrl()
+            )
             interaction.deferUpdate()
         }
     }
@@ -381,12 +395,14 @@ export class PictureSelect {
                 to.info.username +
                 ' is selecting card from ' +
                 from.info.username
-            ekManager.updateGeneralMessage(description)
+            await ekManager.updateGeneralMessage(description)
 
             if (to.interaction) {
                 const cardsMenu = new MessageSelectMenu()
                     .setCustomId(PictureSelect.getCustomThreeCardSelectCardId())
-                    .setPlaceholder(`Which card you think ${from.info.username} have`)
+                    .setPlaceholder(
+                        `Which card you think ${from.info.username} have`
+                    )
                 ekManager.deck.typeCard.forEach((c) => {
                     cardsMenu.addOptions({
                         label: c.emoji + ' ' + c.label,
@@ -479,9 +495,9 @@ export class PictureSelect {
                             ekManager.getHandEmbed(
                                 this.selectedHand,
                                 bold(this.owner.info.username) +
-                                ' think you have ' +
-                                inlineCode(cardString) +
-                                ' and has stolen no card from you'
+                                    ' think you have ' +
+                                    inlineCode(cardString) +
+                                    ' and has stolen no card from you'
                             ),
                         ],
                     })
@@ -491,7 +507,7 @@ export class PictureSelect {
                         ekManager.getHandMessage(
                             this.owner,
                             'Your predict is wrong. You have stolen no card from ' +
-                            bold(this.selectedHand.info.username)
+                                bold(this.selectedHand.info.username)
                         )
                     )
                 }
@@ -499,7 +515,7 @@ export class PictureSelect {
                     bold(this.owner.info.username + "'s") +
                     ' predict is wrong and steal no card from ' +
                     bold(this.selectedHand.info.username)
-                ekManager.updateGeneralMessage(description)
+                await ekManager.updateGeneralMessage(description)
             }
             interaction.deferUpdate()
         }
@@ -513,6 +529,7 @@ export class PictureSelect {
             const card = ekManager.deck.droppedCards.find(
                 (c) => c.getCustomId() == interaction.values[0]
             )
+            console.log(card)
             if (!card) return
             this.owner.cards.push(card)
             ekManager.updateEntireHandMesssage()
@@ -534,8 +551,13 @@ export class PictureSelect {
 
             const description =
                 bold(this.owner.info.username) +
-                ' has got ' + cardString + ' from the dropped deck'
-            ekManager.updateGeneralMessage(description, card.getImageUrl())
+                ' has got ' +
+                cardString +
+                ' from the dropped deck'
+            await ekManager.updateGeneralMessage(
+                description,
+                card.getImageUrl()
+            )
 
             interaction.deferUpdate()
         }

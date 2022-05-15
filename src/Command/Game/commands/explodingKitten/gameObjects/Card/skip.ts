@@ -17,19 +17,24 @@ export class Skip extends Card {
             )
             if (!hand) throw new Error()
 
-            ekManager.setCurrentDrawCard(ekManager.getCurrentDrawCard() - 1)
-            ekManager.passTurn()
             ekManager.dropCard(hand, [this])
+            ekManager.updateHistory(hand, [this])
+            ekManager.setCurrentDrawCard(ekManager.currentDrawCard - 1)
+            ekManager.passTurn()
             if (hand.interaction) {
                 hand.interaction.editReply({
                     embeds: [ekManager.getHandEmbed(hand)],
                 })
             }
+
             const description =
                 hand.info.username +
                 ' use ' +
                 inlineCode(this.getEmoji() + ' ' + this.getLabel())
-            ekManager.updateGeneralMessage(description, this.getImageUrl())
+            await ekManager.updateGeneralMessage(
+                description,
+                this.getImageUrl()
+            )
             await interaction.deferUpdate()
             hand.interaction = interaction
         } catch (e) {

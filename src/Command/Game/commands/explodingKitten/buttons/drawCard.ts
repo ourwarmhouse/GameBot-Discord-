@@ -28,7 +28,7 @@ export class DrawCards extends GameButton {
             if (!hand) throw new Error('Invalid hand')
             const card = ekManager.deck.cards.shift()
             if (!card) throw new Error('Empty deck')
-            ekManager.setCurrentDrawCard(ekManager.getCurrentDrawCard() - 1)
+            ekManager.setCurrentDrawCard(ekManager.currentDrawCard - 1)
 
             if (card.getLabel() == ExplodingKitten.name) {
                 //you must be exploded if draw a exploding kitten card

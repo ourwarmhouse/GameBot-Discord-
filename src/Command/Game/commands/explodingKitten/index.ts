@@ -9,8 +9,8 @@ import ExplodingKittenManager from './explodingKittenManager'
 export default class ExplodingKitten extends GameCommand {
     constructor(gameManager: Game) {
         super(gameManager)
-        this._name = this._name + ' explodingKitten'
-        this._alias = this._alias + ' ek'
+        this._name = 'explodingKitten'
+        this._alias = 'ek'
     }
     async execute(messageHandler: MessageHandler, message: Message<boolean>) {
         try {

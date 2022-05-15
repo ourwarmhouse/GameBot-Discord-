@@ -17,10 +17,12 @@ export class Attack extends Card {
             )
             if (!hand) throw new Error()
             ekManager.dropCard(hand, [this])
-            let current = ekManager.getCurrentDrawCard()
+            ekManager.updateHistory(hand, [this])
+            let current = ekManager.currentDrawCard
             ekManager.setCurrentDrawCard(0)
             ekManager.passTurn()
             ekManager.setCurrentDrawCard(current + 1)
+
             ekManager.updateEntireHandMesssage()
 
             const description =

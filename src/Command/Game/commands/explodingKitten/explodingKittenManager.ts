@@ -1,4 +1,4 @@
-import { bold, inlineCode } from '@discordjs/builders'
+import {bold, inlineCode} from '@discordjs/builders'
 import {
     CacheType,
     InteractionCollector,
@@ -11,25 +11,36 @@ import {
 } from 'discord.js'
 import e from 'express'
 import MessageHandler from 'Handler/message'
-import { uid } from 'uid'
+import {uid} from 'uid'
 import GameManager from '../../../Game'
 import UserManager from '../../../User'
-import { Back } from './buttons/back'
-import { Destroy } from './buttons/destroy'
-import { DrawCards } from './buttons/drawCard'
-import { Join } from './buttons/join'
-import { Leave } from './buttons/leave'
-import { ShuffleCards } from './buttons/shuffleHandCard'
-import { SortCards } from './buttons/sortHandCard'
-import { Start } from './buttons/start'
-import { ViewCards } from './buttons/viewCard'
-import { Card } from './gameObjects/Card'
-import { Defuse } from './gameObjects/Card/defuse'
-import { Cat } from './gameObjects/Card/picture'
-import { Deck } from './gameObjects/deck'
-import { Hand } from './gameObjects/hand'
-import { FavorSelect } from './selects/favorSelect'
-import { PictureSelect } from './selects/pictureSelect'
+import {Back} from './buttons/back'
+import {Destroy} from './buttons/destroy'
+import {DrawCards} from './buttons/drawCard'
+import {Join} from './buttons/join'
+import {Leave} from './buttons/leave'
+import {ShuffleCards} from './buttons/shuffleHandCard'
+import {SortCards} from './buttons/sortHandCard'
+import {Start} from './buttons/start'
+import {ViewCards} from './buttons/viewCard'
+import {Card} from './gameObjects/Card'
+import {Defuse} from './gameObjects/Card/defuse'
+import {Nope} from './gameObjects/Card/nope'
+import {Cat} from './gameObjects/Card/picture'
+import {SeeTheFuture} from './gameObjects/Card/seeTheFuture'
+import {Shuffle} from './gameObjects/Card/shuffle'
+import {Deck} from './gameObjects/deck'
+import {Hand} from './gameObjects/hand'
+import {FavorSelect} from './selects/favorSelect'
+import {PictureSelect} from './selects/pictureSelect'
+
+class History {
+    constructor(
+        public hand: Hand,
+        public cards: Card[],
+        public currentDrawCard: number
+    ) {}
+}
 
 export default class ExplodingKittenManager {
     public id: string
@@ -44,6 +55,7 @@ export default class ExplodingKittenManager {
     private _turn: number
     private _currentDrawCard: number // number of card current player has to draw
     // private _nextDrawCard: number // number of card next player has to draw
+    private _history: History[]
 
     // public state: State
     constructor(
@@ -55,6 +67,7 @@ export default class ExplodingKittenManager {
         this._currentDrawCard = 1
         this.id = uid()
         this._hands = []
+        this._history = []
         this._turn = 0
         this._userManager = _gameManager.userManager
     }
@@ -80,11 +93,10 @@ export default class ExplodingKittenManager {
                 iconURL: info.avatarURL() || info.defaultAvatarURL,
             })
             .setColor(isMyTurn ? 'GREEN' : 'RED')
-        if (isMyTurn)
-            embed.setTitle(
-                `You have to draw ${this._currentDrawCard} ${this._currentDrawCard > 1 ? 'cards' : 'card'
-                }`
-            )
+        const cardHaveToDrawString = `You have to draw ${
+            this._currentDrawCard
+        } ${this._currentDrawCard > 1 ? 'cards' : 'card'}`
+        if (isMyTurn) embed.setTitle(cardHaveToDrawString)
         if (insertDescription) embed.setDescription(insertDescription)
         if (thumbnailPath) embed.setThumbnail(thumbnailPath)
         return embed
@@ -95,7 +107,7 @@ export default class ExplodingKittenManager {
         const isMyTurn = info.id == turn.info.id
         const isInGame = this.hands.find((h) => h.info.id == info.id)
 
-        const numOfButton = hand.cards.length + 1
+        const numOfButton = hand.cards.length
         const drawCardButton = new DrawCards()
             .getComponent()
             .setDisabled(!isMyTurn || !isInGame)
@@ -111,7 +123,6 @@ export default class ExplodingKittenManager {
             for (let column = 0; column < maxColumnPerRow; ++column) {
                 const currentCardIndex = column + maxColumnPerRow * row
                 if (!hand.cards[currentCardIndex]) {
-                    r.addComponents(drawCardButton)
                     break
                 } else {
                     const card = hand.cards[currentCardIndex]
@@ -119,6 +130,8 @@ export default class ExplodingKittenManager {
                     let cardComponent
                     if (card.constructor.name == Defuse.name)
                         cardComponent = card.getComponent().setDisabled(true)
+                    else if (card.constructor.name == Nope.name)
+                        cardComponent = card.getComponent().setDisabled(false)
                     else if (Cat.isCat(card)) {
                         const comboTwoOrThreeCards = hand.cards.filter(
                             (c) => c.getLabel() == card.getLabel()
@@ -151,7 +164,11 @@ export default class ExplodingKittenManager {
             .getComponent()
             .setDisabled(!isInGame)
         const utilitiesRow = new MessageActionRow()
-        utilitiesRow.addComponents(sortCardsButton, shuffleCardsButton)
+        utilitiesRow.addComponents(
+            sortCardsButton,
+            shuffleCardsButton,
+            drawCardButton
+        )
         rowList.push(utilitiesRow)
         return rowList
     }
@@ -169,9 +186,9 @@ export default class ExplodingKittenManager {
             embed.setTitle('You died')
             embed.setDescription("don't be hurt")
             embed.setImage('https://art.pixilart.com/62256959cd49d04.gif')
-            return { embeds: [embed], components: [] }
+            return {embeds: [embed], components: []}
         } else {
-            return { embeds: [embed], components: buttons }
+            return {embeds: [embed], components: buttons}
         }
     }
 
@@ -180,7 +197,7 @@ export default class ExplodingKittenManager {
         thumbnailPath?: string
     ): Promise<ReplyMessageOptions> {
         const info = this._hands[this._turn].info
-        const { username, defaultAvatarURL, id } = info
+        const {username, defaultAvatarURL, id} = info
 
         if (!insertDescription)
             insertDescription = `Click ${inlineCode(
@@ -191,18 +208,20 @@ export default class ExplodingKittenManager {
             ' have to draw ' +
             bold(
                 this._currentDrawCard.toString() +
-                (this._currentDrawCard == 1 ? ' card' : ' cards')
+                    (this._currentDrawCard == 1 ? ' card' : ' cards')
             )
 
         const userList = this._hands
             .map((h) =>
                 h.info.id == id
                     ? bold(
-                        `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${h.cards.length
-                        } cards)`
-                    )
-                    : `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${h.cards.length
-                    } cards)`
+                          `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${
+                              h.cards.length
+                          } cards)`
+                      )
+                    : `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${
+                          h.cards.length
+                      } cards)`
             )
             .join('\n')
 
@@ -216,10 +235,16 @@ export default class ExplodingKittenManager {
             })
 
         if (this.hands.length == 1) {
+            const winImages = [
+                'https://media4.giphy.com/media/Sqevo2VpVbgKNQX3bn/giphy.gif?cid=ecf05e47mjztsog7m2xk5snnlmly8nqc70offqmt6ivcl0le&rid=giphy.gif&ct=g',
+                'https://media1.giphy.com/media/ZYL86UZ7MjeIPDZ4xp/giphy.gif?cid=ecf05e47fp6c3eh9odttk4ma49ljqj425g6ianf2hy2m1v8z&rid=giphy.gif&ct=g',
+                'https://media3.giphy.com/media/W08g7o5V6Dk6ru1q9y/200w.webp?cid=ecf05e47mjztsog7m2xk5snnlmly8nqc70offqmt6ivcl0le&rid=200w.webp&ct=g',
+                'https://media0.giphy.com/media/vVegyymxA90fkY8jkE/200w.webp?cid=ecf05e47mjztsog7m2xk5snnlmly8nqc70offqmt6ivcl0le&rid=200w.webp&ct=g',
+                'https://media4.giphy.com/media/nR4L10XlJcSeQ/200.webp?cid=ecf05e47mjztsog7m2xk5snnlmly8nqc70offqmt6ivcl0le&rid=200.webp&ct=g',
+            ]
+            let randomImage = Math.floor(Math.random() * (winImages.length - 1))
             embed.setDescription(insertDescription)
-            embed.setImage(
-                'https://media1.giphy.com/media/ZYL86UZ7MjeIPDZ4xp/giphy.gif?cid=ecf05e47fp6c3eh9odttk4ma49ljqj425g6ianf2hy2m1v8z&rid=giphy.gif&ct=g'
-            )
+            embed.setImage(winImages[randomImage])
         } else
             embed.setDescription(
                 drawCardString + '\n\n' + insertDescription + '\n\n' + userList
@@ -247,7 +272,7 @@ export default class ExplodingKittenManager {
     }
 
     public async getInitGameMessage() {
-        const { username, defaultAvatarURL } = this._message.author
+        const {username, defaultAvatarURL} = this._message.author
         const introducedString =
             username + ' has started a game of Exploding Kittens!'
 
@@ -314,6 +339,9 @@ export default class ExplodingKittenManager {
                         (h) => h.info.id == interaction.user.id
                     )
                     if (!hand) return
+                    SeeTheFuture.onSecondClick(this, interaction)
+                    Shuffle.onSecondClick(this, interaction)
+
                     const drawCardButton = new DrawCards()
                     const sortCardButton = new SortCards()
                     const shuffleHandCardButton = new ShuffleCards()
@@ -363,16 +391,16 @@ export default class ExplodingKittenManager {
         if (this.hands.length == 1) {
             const winner = this._hands[0]
             if (!winner) return
-            this.updateGeneralMessage(
-                winner.info.username + ' won the game'
-            )
+            this.updateGeneralMessage(winner.info.username + ' won the game')
             if (this._hands[0].interaction) {
                 const embed = this.getHandEmbed(winner)
                 embed.setTitle('You won the game')
-                await this._hands[0].interaction.editReply({ components: [], embeds: [embed] })
+                await this._hands[0].interaction.editReply({
+                    components: [],
+                    embeds: [embed],
+                })
             }
         }
-        
     }
 
     updateEntireHandMesssage() {
@@ -401,6 +429,9 @@ export default class ExplodingKittenManager {
             }
         }
     }
+    updateHistory(hand: Hand, cards: Card[]) {
+        this.history.push(new History(hand, cards, this._currentDrawCard))
+    }
     passTurn() {
         if (this._currentDrawCard <= 0) {
             this._turn++
@@ -409,12 +440,21 @@ export default class ExplodingKittenManager {
             this.updateEntireHandMesssage()
         }
     }
+    revertTurn(hand: Hand) {
+        this._turn--
+        let handPosition = 0
+        for (let i = 0; i < this.hands.length; ++i) {
+            if (this.hands[i].info.id == hand.info.id) handPosition = i
+        }
+        this._turn = handPosition
+        this.updateEntireHandMesssage()
+    }
 
     setCurrentDrawCard(number: number) {
         this._currentDrawCard = number
     }
 
-    getCurrentDrawCard() {
+    public get currentDrawCard() {
         return this._currentDrawCard
     }
     public get hands() {
@@ -441,26 +481,7 @@ export default class ExplodingKittenManager {
     public get userManager() {
         return this._userManager
     }
+    public get history() {
+        return this._history
+    }
 }
-
-// public async getAttachments(numOfCards: number) {
-//     let height = 250
-//     let width = 130
-//     const canvas = Canvas.createCanvas(
-//         width * numOfCards + (numOfCards - 1) * 5,
-//         height
-//     )
-//     const ctx = canvas.getContext('2d')
-//     const img1 = await Canvas.loadImage(
-//         path.join(__dirname, './assets/Attack/BackHair.png')
-//     )
-//     //const img2 = await Canvas.loadImage('./assets/Attack/BearODacktyl.png')
-//     for (let i = 0; i < numOfCards; i++) {
-//         if (i == 0) {
-//             ctx.drawImage(img1, i, 0, width, height)
-//         } else {
-//             ctx.drawImage(img1, i * width + 5 * i, 0, width, height)
-//         }
-//     }
-//     return [new MessageAttachment(canvas.toBuffer())]
-// }

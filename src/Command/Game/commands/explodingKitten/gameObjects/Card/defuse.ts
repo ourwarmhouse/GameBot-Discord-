@@ -27,7 +27,10 @@ export class Defuse extends Card {
                 ' use ' +
                 inlineCode(this.getEmoji() + ' ' + this.getLabel()) +
                 ' and safe after the exploding'
-            ekManager.updateGeneralMessage(description, this.getImageUrl())
+            await ekManager.updateGeneralMessage(
+                description,
+                this.getImageUrl()
+            )
 
             await interaction.deferUpdate()
             hand.interaction = interaction

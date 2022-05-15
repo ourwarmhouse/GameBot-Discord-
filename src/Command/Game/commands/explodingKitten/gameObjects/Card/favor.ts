@@ -49,13 +49,17 @@ export class Favor extends Card {
                 })
             }
             ekManager.dropCard(hand, [this], false)
+
             const description =
                 hand.info.username +
                 ' use ' +
                 inlineCode(this.getEmoji() + ' ' + this.getLabel()) +
                 ' and selecting a player to steal one card'
-            ekManager.updateGeneralMessage(description, this.getImageUrl())
-
+            await ekManager.updateGeneralMessage(
+                description,
+                this.getImageUrl()
+            )
+            ekManager.updateHistory(hand, [this])
             await interaction.deferUpdate()
             hand.interaction = interaction
         } catch (e) {

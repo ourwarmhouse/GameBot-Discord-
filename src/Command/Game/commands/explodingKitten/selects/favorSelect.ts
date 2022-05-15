@@ -8,6 +8,7 @@ import {
 import {GameSelect} from '.'
 import ExplodingKittenManager from '../explodingKittenManager'
 import {Card} from '../gameObjects/Card'
+import {Nope} from '../gameObjects/Card/nope'
 import {Hand} from '../gameObjects/hand'
 
 export class FavorSelect {
@@ -47,7 +48,7 @@ export class FavorSelect {
                     from.info.username +
                     ' is selecting card for ' +
                     to.info.username
-                ekManager.updateGeneralMessage(description)
+                await ekManager.updateGeneralMessage(description)
 
                 if (from.interaction) {
                     const cardsMenu = new MessageSelectMenu()
@@ -62,11 +63,22 @@ export class FavorSelect {
                         from,
                         'Select one card for ' + bold(this.owner.info.username)
                     )
-                    from.interaction.editReply({
+                    const rowList = []
+                    rowList.push(
+                        new MessageActionRow().addComponents(cardsMenu)
+                    )
+                    const nopeCard = from.cards.find(
+                        (c) => c.getLabel() == Nope.name
+                    )
+                    if (nopeCard) {
+                        const cardRow = new MessageActionRow().addComponents(
+                            nopeCard.getComponent()
+                        )
+                        rowList.push(cardRow)
+                    }
+                    await from.interaction.editReply({
                         embeds: [embed],
-                        components: [
-                            new MessageActionRow().addComponents(cardsMenu),
-                        ],
+                        components: rowList,
                     })
                 }
                 if (to.interaction) {
@@ -104,7 +116,10 @@ export class FavorSelect {
                     bold(this.owner.info.username) +
                     ' has stolen a card from ' +
                     bold(this.selectedHand.info.username)
-                ekManager.updateGeneralMessage(description, card.getImageUrl())
+                await ekManager.updateGeneralMessage(
+                    description,
+                    card.getImageUrl()
+                )
 
                 if (this.owner.interaction) {
                     await this.owner.interaction.editReply(

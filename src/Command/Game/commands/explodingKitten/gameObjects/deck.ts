@@ -3,6 +3,7 @@ import {Attack} from './Card/attack'
 import {Defuse} from './Card/defuse'
 import {ExplodingKitten} from './Card/explodingKitten'
 import {Favor} from './Card/favor'
+import {Nope} from './Card/nope'
 import {Melon, Potato, Rainbow, Taco} from './Card/picture'
 import {SeeTheFuture} from './Card/seeTheFuture'
 import {Shuffle} from './Card/shuffle'
@@ -34,11 +35,10 @@ export class Deck {
         }
 
         addCards(
-            _hands.length + 1,
+            _hands.length,
             (order, priority) => new Defuse(order, priority)
         )
-
-        // addCards(5, (order, priority) => new Nope(order, priority))
+        addCards(5, (order, priority) => new Nope(order, priority))
         addCards(5, (order, priority) => new SeeTheFuture(order, priority))
         addCards(4, (order, priority) => new Shuffle(order, priority))
         addCards(4, (order, priority) => new Attack(order, priority))
@@ -48,23 +48,6 @@ export class Deck {
         addCards(4, (order, priority) => new Taco(order, priority))
         addCards(4, (order, priority) => new Rainbow(order, priority))
         addCards(4, (order, priority) => new Potato(order, priority))
-        // for (let i = 0; i < 5; ++i) {
-        //     this._cards.push(new Nope(i,count))
-        // }
-        // for (let i = 0; i < 5; ++i) {
-        //     this._cards.push(new SeeTheFuture(i,count))
-        // }
-
-        // for (let i = 0; i < 4; ++i) {
-        //     this._cards.push(new Shuffle(i,count))
-        //     this._cards.push(new Attack(i,count))
-        //     this._cards.push(new Skip(i,count))
-        //     this._cards.push(new Favor(i,count))
-        //     this._cards.push(new Melon(i,count))
-        //     this._cards.push(new Taco(i,count))
-        //     this._cards.push(new Rainbow(i,count))
-        //     this._cards.push(new Potato(i,count))
-        // }
     }
     static shuffle(cards: Card[]) {
         for (let i = cards.length - 1; i > 0; --i) {
@@ -78,11 +61,11 @@ export class Deck {
     pushToDroppedCards(card: Card) {
         this._droppedCards.push(card)
     }
-    // addDefuse() {
-    //     for (let i = 0; i < 1; ++i) {
-    //         this._cards.push(new Defuse(i + this._hands.length))
-    //     }
-    // }
+    addDefuse() {
+        for (let i = 0; i < 1; ++i) {
+            this._cards.push(new Defuse(i + this._hands.length, 0))
+        }
+    }
     addExploding() {
         for (let i = 0; i < this._hands.length - 1; ++i) {
             this._cards.push(new ExplodingKitten(i, 100))
@@ -106,7 +89,7 @@ export class Deck {
                 if (card) hand.cards.push(card)
             }
         }
-        // this.addDefuse()
+        this.addDefuse()
         this.addExploding()
         Deck.shuffle(this._cards)
     }
