@@ -66,6 +66,8 @@ export class FavorSelect {
                     const rowList = []
                     rowList.push(
                         new MessageActionRow().addComponents(cardsMenu)
+
+                        
                     )
                     const nopeCard = from.cards.find(
                         (c) => c.getLabel() == Nope.name
