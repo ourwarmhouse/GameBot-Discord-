@@ -25,7 +25,7 @@ Game:
                     - save private message in Hand class
 
             },
-            components:[...],
+            components:  [...],
             files:[]
         } -> private card 
 
