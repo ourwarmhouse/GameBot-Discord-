@@ -62,7 +62,8 @@ export default class ExplodingKittenManager {
         private _messageHandler: MessageHandler,
         private _message: Message<boolean>,
         private _gameManager: GameManager,
-        private _betNumber: number
+        private _betNumber: number,
+        public channelId: string 
     ) {
         this._currentDrawCard = 1
         this.id = uid()

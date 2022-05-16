@@ -14,11 +14,17 @@ export default class ExplodingKitten extends GameCommand {
     }
     async execute(messageHandler: MessageHandler, message: Message<boolean>) {
         try {
+            if (!message.channelId) throw new Error()
+
+            if (this._gameManager.explodingKittenGames.find(g=>g.channelId == message.channelId))
+                throw new Error()
+            
             const gameManager = new ExplodingKittenManager(
                 messageHandler,
                 message,
                 this._gameManager,
-                0
+                0,
+                message.channelId
             )
 
             if (!message.guildId) throw new Error()
