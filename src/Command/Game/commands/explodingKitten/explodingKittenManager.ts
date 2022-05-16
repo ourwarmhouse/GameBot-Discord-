@@ -288,10 +288,10 @@ export default class ExplodingKittenManager {
             })
 
         const joinButton = new Join().getComponent()
-        const leaveButton = new Leave().getComponent()
+        // const leaveButton = new Leave().getComponent()
         const memberButtons = new MessageActionRow().addComponents(
             joinButton,
-            leaveButton
+            // leaveButton
         )
         const startButton = new Start().getComponent()
         const destroyButton = new Destroy().getComponent()
