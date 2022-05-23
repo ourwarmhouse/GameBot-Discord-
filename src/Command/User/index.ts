@@ -5,6 +5,7 @@ import Cash from './commands/cash'
 import Daily from './commands/daily'
 import Rank from './commands/rank'
 import Work from './commands/work'
+import Love from './commands/anonymous'
 import ListEmojis from './commands/listemojis'
 import {User as DiscordUser} from 'discord.js'
 import Give from './commands/give'
@@ -21,6 +22,7 @@ export default class User extends ComamndManager {
             new Work(this),
             new ListEmojis(this),
             new Give(this),
+            new Love(this)
         ])
     }
     public async getOrCreateUser(user: DiscordUser, serverId: string) {

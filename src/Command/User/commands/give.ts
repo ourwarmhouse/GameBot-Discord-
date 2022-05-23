@@ -76,10 +76,10 @@ export default class Give extends UserCommand {
     public getHelpString(): string {
         return (
             inlineCode(
-                Constant.prefix + this._name + " [number | 'all' | 'a']"
+                Constant.prefix + this._name + " @tag [number | 'all' | 'a']"
             ) +
             ' (' +
-            inlineCode(this.alias + " [number | 'all' | 'a']") +
+            inlineCode(this.alias + " @tag [number | 'all' | 'a']") +
             ')'
         )
     }

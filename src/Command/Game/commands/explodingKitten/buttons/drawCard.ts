@@ -6,6 +6,11 @@ import {Defuse} from '../gameObjects/Card/defuse'
 import {ExplodingKitten} from '../gameObjects/Card/explodingKitten'
 
 export class DrawCards extends GameButton {
+    private _isDrawFromBottom: Boolean
+    constructor(isFromBottom = false) {
+        super()
+        this._isDrawFromBottom = isFromBottom
+    }
     getCustomId(): string {
         return 'Draw'
     }
@@ -26,7 +31,12 @@ export class DrawCards extends GameButton {
                 (h) => h.info.id == interaction.user.id
             )
             if (!hand) throw new Error('Invalid hand')
-            const card = ekManager.deck.cards.shift()
+            let card
+            if (this._isDrawFromBottom){
+                card = ekManager.deck.cards.pop()
+            } else {
+                card = ekManager.deck.cards.shift()
+            }
             if (!card) throw new Error('Empty deck')
             ekManager.setCurrentDrawCard(ekManager.currentDrawCard - 1)
 

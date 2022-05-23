@@ -1,4 +1,5 @@
-import {bold, inlineCode} from '@discordjs/builders'
+import { bold, inlineCode } from '@discordjs/builders'
+import currency from 'currency.js'
 import {
     CacheType,
     InteractionCollector,
@@ -7,39 +8,38 @@ import {
     MessageComponentInteraction,
     MessageEmbed,
     ReplyMessageOptions,
-    User,
+    User
 } from 'discord.js'
-import e from 'express'
 import MessageHandler from 'Handler/message'
-import {uid} from 'uid'
+import { uid } from 'uid'
 import GameManager from '../../../Game'
 import UserManager from '../../../User'
-import {Back} from './buttons/back'
-import {Destroy} from './buttons/destroy'
-import {DrawCards} from './buttons/drawCard'
-import {Join} from './buttons/join'
-import {Leave} from './buttons/leave'
-import {ShuffleCards} from './buttons/shuffleHandCard'
-import {SortCards} from './buttons/sortHandCard'
-import {Start} from './buttons/start'
-import {ViewCards} from './buttons/viewCard'
-import {Card} from './gameObjects/Card'
-import {Defuse} from './gameObjects/Card/defuse'
-import {Nope} from './gameObjects/Card/nope'
-import {Cat} from './gameObjects/Card/picture'
-import {SeeTheFuture} from './gameObjects/Card/seeTheFuture'
-import {Shuffle} from './gameObjects/Card/shuffle'
-import {Deck} from './gameObjects/deck'
-import {Hand} from './gameObjects/hand'
-import {FavorSelect} from './selects/favorSelect'
-import {PictureSelect} from './selects/pictureSelect'
+import { Back } from './buttons/back'
+import { Destroy } from './buttons/destroy'
+import { DrawCards } from './buttons/drawCard'
+import { Join } from './buttons/join'
+import { Leave } from './buttons/leave'
+import { ShuffleCards } from './buttons/shuffleHandCard'
+import { SortCards } from './buttons/sortHandCard'
+import { Start } from './buttons/start'
+import { ViewCards } from './buttons/viewCard'
+import { Card } from './gameObjects/Card'
+import { Defuse } from './gameObjects/Card/defuse'
+import { Nope } from './gameObjects/Card/nope'
+import { Cat } from './gameObjects/Card/picture'
+import { SeeTheFuture } from './gameObjects/Card/seeTheFuture'
+import { Shuffle } from './gameObjects/Card/shuffle'
+import { Deck } from './gameObjects/deck'
+import { Hand } from './gameObjects/hand'
+import { FavorSelect } from './selects/favorSelect'
+import { PictureSelect } from './selects/pictureSelect'
 
 class History {
     constructor(
         public hand: Hand,
         public cards: Card[],
         public currentDrawCard: number
-    ) {}
+    ) { }
 }
 
 export default class ExplodingKittenManager {
@@ -63,7 +63,7 @@ export default class ExplodingKittenManager {
         private _message: Message<boolean>,
         private _gameManager: GameManager,
         private _betNumber: number,
-        public channelId: string 
+        public channelId: string
     ) {
         this._currentDrawCard = 1
         this.id = uid()
@@ -71,6 +71,7 @@ export default class ExplodingKittenManager {
         this._history = []
         this._turn = 0
         this._userManager = _gameManager.userManager
+        this._betNumber = 2345
     }
 
     public getHandEmbed(
@@ -94,9 +95,8 @@ export default class ExplodingKittenManager {
                 iconURL: info.avatarURL() || info.defaultAvatarURL,
             })
             .setColor(isMyTurn ? 'GREEN' : 'RED')
-        const cardHaveToDrawString = `You have to draw ${
-            this._currentDrawCard
-        } ${this._currentDrawCard > 1 ? 'cards' : 'card'}`
+        const cardHaveToDrawString = `You have to draw ${this._currentDrawCard
+            } ${this._currentDrawCard > 1 ? 'cards' : 'card'}`
         if (isMyTurn) embed.setTitle(cardHaveToDrawString)
         if (insertDescription) embed.setDescription(insertDescription)
         if (thumbnailPath) embed.setThumbnail(thumbnailPath)
@@ -187,9 +187,9 @@ export default class ExplodingKittenManager {
             embed.setTitle('You died')
             embed.setDescription("don't be hurt")
             embed.setImage('https://art.pixilart.com/62256959cd49d04.gif')
-            return {embeds: [embed], components: []}
+            return { embeds: [embed], components: [] }
         } else {
-            return {embeds: [embed], components: buttons}
+            return { embeds: [embed], components: buttons }
         }
     }
 
@@ -198,7 +198,7 @@ export default class ExplodingKittenManager {
         thumbnailPath?: string
     ): Promise<ReplyMessageOptions> {
         const info = this._hands[this._turn].info
-        const {username, defaultAvatarURL, id} = info
+        const { username, defaultAvatarURL, id } = info
 
         if (!insertDescription)
             insertDescription = `Click ${inlineCode(
@@ -209,20 +209,18 @@ export default class ExplodingKittenManager {
             ' have to draw ' +
             bold(
                 this._currentDrawCard.toString() +
-                    (this._currentDrawCard == 1 ? ' card' : ' cards')
+                (this._currentDrawCard == 1 ? ' card' : ' cards')
             )
 
         const userList = this._hands
             .map((h) =>
                 h.info.id == id
                     ? bold(
-                          `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${
-                              h.cards.length
-                          } cards)`
-                      )
-                    : `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${
-                          h.cards.length
-                      } cards)`
+                        `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${h.cards.length
+                        } cards)`
+                    )
+                    : `${h.isMaster ? '👑' : '👤'} ${h.info.username} (${h.cards.length
+                    } cards)`
             )
             .join('\n')
 
@@ -271,7 +269,7 @@ export default class ExplodingKittenManager {
     }
 
     public async getInitGameMessage() {
-        const {username, defaultAvatarURL} = this._message.author
+        const { username, defaultAvatarURL } = this._message.author
         const introducedString =
             username + ' has started a game of Exploding Kittens!'
 
@@ -323,6 +321,8 @@ export default class ExplodingKittenManager {
             const favorSelect = new FavorSelect()
             const pictureSelect = new PictureSelect()
 
+            const seeTheFuture = new SeeTheFuture(-1,-1)
+
             this._buttonCollector.on('collect', async (interaction) => {
                 if (interaction.isSelectMenu()) {
                     favorSelect.onSelect(this, interaction)
@@ -334,11 +334,12 @@ export default class ExplodingKittenManager {
                     leaveButton.onClick(this, interaction)
                     viewCardsButton.onClick(this, interaction)
 
+
                     const hand = this.hands.find(
                         (h) => h.info.id == interaction.user.id
                     )
                     if (!hand) return
-                    SeeTheFuture.onSecondClick(this, interaction)
+                    seeTheFuture.onSecondClick(this, interaction)
                     Shuffle.onSecondClick(this, interaction)
 
                     const drawCardButton = new DrawCards()
@@ -396,7 +397,19 @@ export default class ExplodingKittenManager {
         if (this.hands.length == 1) {
             const winner = this._hands[0]
             if (!winner) return
-            this.updateGeneralMessage(winner.info.username + ' won the game')
+            this.updateGeneralMessage(winner.info.username + ' won the game and received ' + inlineCode(currency(this._betNumber).format()))
+            if (!this.message?.guildId) return
+            const user = await this._userManager.getOrCreateUser(
+                winner.info,
+                this.message.guildId
+            )
+            if (!user) throw new Error()
+            const isReceived = await this._userManager.updateBalance(
+                winner.info.id,
+                this.message.guildId,
+                this._betNumber
+            )
+
             if (this._hands[0].interaction) {
                 const embed = this.getHandEmbed(winner)
                 embed.setTitle('You won the game')
