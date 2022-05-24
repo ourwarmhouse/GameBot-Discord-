@@ -24,6 +24,7 @@ import { SortCards } from './buttons/sortHandCard'
 import { Start } from './buttons/start'
 import { ViewCards } from './buttons/viewCard'
 import { Card } from './gameObjects/Card'
+import { AlterTheFuture } from './gameObjects/Card/alterTheFuture'
 import { Defuse } from './gameObjects/Card/defuse'
 import { Nope } from './gameObjects/Card/nope'
 import { Cat } from './gameObjects/Card/picture'
@@ -321,7 +322,8 @@ export default class ExplodingKittenManager {
             const favorSelect = new FavorSelect()
             const pictureSelect = new PictureSelect()
 
-            const seeTheFuture = new SeeTheFuture(-1,-1)
+            const seeTheFuture = new SeeTheFuture(-1, -1)
+            const alterTheFuture = new AlterTheFuture(-1,-1)
 
             this._buttonCollector.on('collect', async (interaction) => {
                 if (interaction.isSelectMenu()) {
@@ -340,6 +342,8 @@ export default class ExplodingKittenManager {
                     )
                     if (!hand) return
                     seeTheFuture.onSecondClick(this, interaction)
+                    alterTheFuture.onSecondClick(this, interaction)
+                    alterTheFuture.onTertiaryClick(this, interaction)
                     Shuffle.onSecondClick(this, interaction)
 
                     const drawCardButton = new DrawCards()

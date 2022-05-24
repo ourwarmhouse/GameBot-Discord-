@@ -44,7 +44,7 @@ export default class Love extends UserCommand {
 
     async execute(messageHandler: message, message: Message<boolean>) {
         try {
-            this._amount = 3000000
+            this._amount = 3000
             if (!message.guildId) throw new Error()
             const user = await this._userManager.getOrCreateUser(
                 message.author,

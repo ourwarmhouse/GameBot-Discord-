@@ -11,7 +11,7 @@ import ExplodingKittenManager from '../../explodingKittenManager'
 
 export class BocDit extends Card {
 
-    getEmoji(): string {
+    getEmoji(): string {                           
         return '🍑'
     }
     async onClick(

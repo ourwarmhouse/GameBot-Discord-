@@ -39,17 +39,17 @@ export class Deck {
             _hands.length,
             (order, priority) => new Defuse(order, priority)
         )
-        // addCards(5, (order, priority) => new Nope(order, priority))
+        addCards(5, (order, priority) => new Nope(order, priority))
         addCards(5, (order, priority) => new SeeTheFuture(order, priority))
-        // addCards(4, (order, priority) => new Shuffle(order, priority))
-        // addCards(4, (order, priority) => new Attack(order, priority))
-        // addCards(4, (order, priority) => new Skip(order, priority))
-        // addCards(4, (order, priority) => new Favor(order, priority))
+        addCards(4, (order, priority) => new Shuffle(order, priority))
+        addCards(4, (order, priority) => new Attack(order, priority))
+        addCards(4, (order, priority) => new Skip(order, priority))
+        addCards(4, (order, priority) => new Favor(order, priority))
         addCards(4, (order, priority) => new Melon(order, priority))
         addCards(4, (order, priority) => new Taco(order, priority))
         addCards(4, (order, priority) => new Rainbow(order, priority))
         addCards(4, (order, priority) => new Potato(order, priority))
-        addCards(2, (order, priority) => new AlterTheFuture(order, priority))
+        // addCards(2, (order, priority) => new AlterTheFuture(order, priority))
         
     }
     static shuffle(cards: Card[]) {
